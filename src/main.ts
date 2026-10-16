@@ -1,29 +1,306 @@
-import './style.css';
-import {levels,WIDTH,HEIGHT} from './levels';
-import {createBall,shoot,step,STEP, type Ball} from './physics';
-const app=document.querySelector<HTMLDivElement>('#app')!;
-let index=0,ball:Ball=createBall(levels[0]),screen:'menu'|'game'='menu',drag:{x:number;y:number}|null=null,aim={x:0,y:0},last=0,acc=0;
-let completed:number[]=[];try{completed=JSON.parse(localStorage.getItem('golf-progress')||'[]');if(!Array.isArray(completed))completed=[];}catch{}
-app.innerHTML=`<header><a id="brand" href="#">一杆归洞<span>ONE SHOT, ONE HOLE</span></a><span class="edition">三关实验室 / v0.1</span></header><main><section id="menu"><div class="eyebrow">日常之中，寻找一条不寻常的路线。</div><h1>只需一杆。<br><em>刚刚好，就好。</em></h1><p class="intro">一颗球，一次机会。把方向交给你，把剩下的交给惯性。</p><div class="cards">${levels.map((l,i)=>`<button class="card" data-level="${i}"><span class="number">0${i+1}</span><span class="mini">${['○ ─ ─ ⚑','○ ↗ ┃ ⚑','○ ▱ ▰ ⚑'][i]}</span><strong>${l.name}</strong><small>${l.subtitle.split(' / ')[1]}</small><span class="enter">进入球场 ↗</span></button>`).join('')}</div><p class="note">拖拽击球 · 墙面反弹 · 低速入洞<br>这是三关最小原型，约 5–10 分钟；完整作业目标为 30 分钟以上。</p></section><section id="game" hidden><div class="levelbar"><div><span id="subtitle" class="eyebrow"></span><h2 id="title"></h2></div><span id="shot">一杆机会</span></div><div class="stage"><canvas width="900" height="560" aria-label="高尔夫球场：按住白球向后拖拽，松手击球"></canvas><div id="result" hidden><div class="resultbox"><span id="result-label"></span><h2 id="result-title"></h2><p id="result-text"></p><button id="retry-result">再试一次</button><button id="next">下一关 →</button><button id="result-menu" class="secondary">返回选关</button></div></div></div><div class="toolbar"><p id="hint"></p><div><button id="retry" class="secondary">重新开始 ↺</button><button id="back" class="secondary">返回选关</button></div></div><div class="meter"><span id="status" role="status" aria-live="polite">拖拽白球以瞄准</span><div><i id="power"></i></div><span id="percent">0%</span></div></section></main><footer>一杆归洞 <span>原创布局 / 球是唯一的机制</span></footer>`;
-const el=(id:string)=>document.getElementById(id)!;
-const canvas=document.querySelector('canvas')!,ctx=canvas.getContext('2d')!;
-function menu(){screen='menu';drag=null;el('menu').hidden=false;el('game').hidden=true;document.querySelectorAll<HTMLElement>('.card').forEach((c,i)=>c.querySelector('.enter')!.textContent=completed.includes(i)?'已归洞 · 再玩一次 ↗':'进入球场 ↗');}
-function start(i:number){index=i;ball=createBall(levels[i]);drag=null;acc=0;screen='game';el('menu').hidden=true;el('game').hidden=false;el('result').hidden=true;el('title').textContent=levels[i].name;el('subtitle').textContent=levels[i].subtitle;el('hint').textContent=levels[i].hint;update();}
-function update(){const d=drag?Math.min(Math.hypot(drag.x-aim.x,drag.y-aim.y)/150,1):0;el('power').style.width=`${d*100}%`;el('percent').textContent=`${Math.round(d*100)}%`;el('shot').textContent=ball.state==='ready'?'一杆机会':'机会已使用';el('status').textContent=ball.state==='ready'?(drag?'向后拉蓄力 · 松手击球':'拖拽白球以瞄准'):ball.state==='moving'?'球正在滚动…':ball.state==='won'?'成功归洞':'停在洞外 · 可以立即重试';}
-function result(){el('result').hidden=false;const won=ball.state==='won';el('result-label').textContent=won?'ONE SHOT. PERFECT.':'再调整一点点';el('result-title').textContent=won?'一杆，归洞。':'差一点也没关系。';el('result-text').textContent=won?(index===2?'三关完成！你已经掌握方向、力度和借墙反弹。':'方向和力度，配合得刚刚好。'):'试试改变力度，或借一面墙找到新路线。';el('next').hidden=!won||index===2;if(won&&!completed.includes(index)){completed.push(index);try{localStorage.setItem('golf-progress',JSON.stringify(completed));}catch{}}update();}
-document.querySelectorAll<HTMLElement>('[data-level]').forEach(b=>b.onclick=()=>start(Number(b.dataset.level)));
-el('retry').onclick=el('retry-result').onclick=()=>start(index);el('back').onclick=el('brand').onclick=el('result-menu').onclick=menu;el('next').onclick=()=>start(index+1);
-function position(e:PointerEvent){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*WIDTH/r.width,y:(e.clientY-r.top)*HEIGHT/r.height};}
-canvas.onpointerdown=e=>{if(ball.state!=='ready')return;const p=position(e);if(Math.hypot(p.x-ball.x,p.y-ball.y)>32)return;canvas.setPointerCapture(e.pointerId);drag={x:ball.x,y:ball.y};aim=p;update();};
-canvas.onpointermove=e=>{if(drag){aim=position(e);update();}};
-canvas.onpointerup=e=>{if(!drag)return;aim=position(e);shoot(ball,drag.x-aim.x,drag.y-aim.y);drag=null;update();};
-canvas.onpointercancel=()=>{drag=null;update();};window.onkeydown=e=>{if(screen==='game'&&e.key.toLowerCase()==='r')start(index);if(e.key==='Escape')menu();};
-function draw(){const l=levels[index];ctx.clearRect(0,0,WIDTH,HEIGHT);ctx.fillStyle=l.office?'#dbc7a5':'#c1d6b5';ctx.fillRect(0,0,WIDTH,HEIGHT);ctx.fillStyle=l.office?'#ecdbbb':'#dce7ce';ctx.fillRect(28,28,WIDTH-56,HEIGHT-56);
- ctx.strokeStyle=l.office?'#d8c6a3':'#cfddbf';ctx.lineWidth=1;for(let x=48;x<WIDTH;x+=32){ctx.beginPath();ctx.moveTo(x,28);ctx.lineTo(x,HEIGHT-28);ctx.stroke();}
- ctx.strokeStyle='#677f65';ctx.lineWidth=5;ctx.strokeRect(28,28,WIDTH-56,HEIGHT-56);
- for(const o of l.obstacles){ctx.fillStyle='#00000015';ctx.fillRect(o.x+4,o.y+5,o.w,o.h);ctx.fillStyle=o.color||'#71897d';ctx.beginPath();ctx.roundRect(o.x,o.y,o.w,o.h,5);ctx.fill();ctx.fillStyle='#334536';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.fillText(o.label||'',o.x+o.w/2,o.y+o.h/2+4);}
- ctx.beginPath();ctx.arc(l.hole.x,l.hole.y,16,0,Math.PI*2);ctx.fillStyle='#243e35';ctx.fill();ctx.strokeStyle='#fff8';ctx.lineWidth=2;ctx.stroke();ctx.strokeStyle='#344f42';ctx.beginPath();ctx.moveTo(l.hole.x+1,l.hole.y-8);ctx.lineTo(l.hole.x+1,l.hole.y-65);ctx.stroke();ctx.fillStyle='#d56846';ctx.beginPath();ctx.moveTo(l.hole.x+2,l.hole.y-65);ctx.lineTo(l.hole.x+37,l.hole.y-53);ctx.lineTo(l.hole.x+2,l.hole.y-42);ctx.fill();
- if(drag){const dx=drag.x-aim.x,dy=drag.y-aim.y,d=Math.hypot(dx,dy);if(d>0){const len=35+Math.min(d,150)*.45;ctx.strokeStyle='#315b48';ctx.setLineDash([6,6]);ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(ball.x,ball.y);ctx.lineTo(ball.x+dx/d*len,ball.y+dy/d*len);ctx.stroke();ctx.setLineDash([]);ctx.strokeStyle='#d56846';ctx.beginPath();ctx.moveTo(ball.x,ball.y);ctx.lineTo(aim.x,aim.y);ctx.stroke();}}
- if(ball.state!=='won'){ctx.fillStyle='#0002';ctx.beginPath();ctx.ellipse(ball.x+2,ball.y+5,11,8,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fffef6';ctx.beginPath();ctx.arc(ball.x,ball.y,9,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#76877c';ctx.lineWidth=1;ctx.stroke();if(ball.state==='ready'&&!drag){ctx.strokeStyle='#fff9';ctx.beginPath();ctx.arc(ball.x,ball.y,19+Math.sin(performance.now()/400)*2,0,Math.PI*2);ctx.stroke();}}
+import "./style.css";
+import { levels } from "./levels";
+import { createBall, shoot, step, STEP, type Ball } from "./physics";
+import { GolfScene } from "./scene";
+import { Sound } from "./audio";
+function boot() {
+  const app = document.querySelector<HTMLDivElement>("#app")!;
+  app.innerHTML = `<div class="cloud cloud-a"></div><div class="cloud cloud-b"></div><div id="viewport"><canvas aria-label="立体高尔夫球场：按住白球向后拖拽，松手击球"></canvas></div>
+<header><button id="home" class="icon" aria-label="返回选关">⌂</button><span class="badge">一颗球 · 一次机会</span><button id="sound" class="icon" aria-label="关闭音效" aria-pressed="true">♫</button></header>
+<section id="menu"><div class="logo"><span class="logo-flag">⚑</span><h1>一杆<span>归洞</span><i>。</i></h1><p>ONE SHOT · TINY WORLDS</p></div><div class="menu-bottom"><button id="start" class="primary">开始游戏 <span>▶</span></button><div class="level-select" aria-label="选择关卡">${levels.map((l, i) => `<button class="level-button" data-level="${i}"><img alt="${l.name}微缩场景预览"><span><b>0${i + 1}</b> ${l.name}</span><small class="progress">一杆挑战</small></button>`).join("")}</div><small class="prototype">三关原型 · 拖拽白球，松手出发</small></div></section>
+<section id="game" hidden><div class="level-title"><span id="subtitle"></span><h2 id="title"></h2></div><div id="shot" class="shot">● 一杆机会</div><div id="tutorial" hidden><span class="hand">☝</span><strong>按住白球，向后拉</strong><span>松手击球 · 拉得越远越有力</span><button id="tutorial-close">知道了，试试看</button></div><div class="game-bottom"><div class="feedback"><span id="status" role="status" aria-live="polite">拖拽白球以瞄准</span><div class="power-row"><span>力度</span><div class="meter"><i id="power"></i></div><b id="percent">0%</b></div></div><div class="controls"><button id="retry">↻ 重新开始</button><button id="back">▦ 返回选关</button></div><p id="hint"></p></div></section>
+<div id="result" hidden><div class="resultbox"><div id="stars">✦ ★ ✦</div><span id="result-label"></span><h2 id="result-title"></h2><p id="result-text"></p><div class="result-actions"><button id="next" class="primary">下一关 →</button><button id="retry-result">↻ 再试一次</button><button id="result-menu">返回选关</button></div></div></div><div id="webgl-error" hidden role="alert"><h2>这个小世界暂时无法打开</h2><p>游戏需要 WebGL。请使用较新的 Chrome、Edge、Firefox 或 Safari，并开启浏览器硬件加速后刷新页面。</p><button onclick="location.reload()">重新加载</button></div>`;
+  const el = (id: string) => document.getElementById(id)!;
+  const canvas = document.querySelector("canvas")!;
+  let view: GolfScene;
+  try {
+    view = new GolfScene(canvas);
+  } catch (e) {
+    el("webgl-error").hidden = false;
+    el("menu").hidden = true;
+    el("viewport").hidden = true;
+    console.warn("WebGL initialization unavailable", e);
+    return;
+  }
+  let index = 0,
+    ball: Ball = createBall(levels[0]),
+    screen: "menu" | "game" = "menu",
+    drag: { x: number; y: number; id: number } | null = null,
+    aim = { x: 0, y: 0 },
+    last = 0,
+    acc = 0,
+    winDelay = -1,
+    tutorialSeen = false;
+  const sound = new Sound();
+  let completed: number[] = [];
+  try {
+    const saved: unknown = JSON.parse(
+      localStorage.getItem("golf-progress") || "[]",
+    );
+    if (Array.isArray(saved))
+      completed = saved.filter((i) => Number.isInteger(i) && i >= 0 && i < 3);
+    tutorialSeen = localStorage.getItem("golf-tutorial") === "seen";
+    sound.enabled = localStorage.getItem("golf-sound") !== "off";
+  } catch {}
+  function syncSound() {
+    el("sound").textContent = "♫";
+    el("sound").classList.toggle("muted", !sound.enabled);
+    el("sound").setAttribute(
+      "aria-label",
+      sound.enabled ? "关闭音效" : "开启音效",
+    );
+    el("sound").setAttribute("aria-pressed", String(sound.enabled));
+  }
+  syncSound();
+  function clearDrag() {
+    if (drag && canvas.hasPointerCapture(drag.id))
+      canvas.releasePointerCapture(drag.id);
+    drag = null;
+    view.clearAim();
+  }
+  function menu() {
+    clearDrag();
+    screen = "menu";
+    winDelay = -1;
+    el("menu").hidden = false;
+    el("game").hidden = true;
+    el("result").hidden = true;
+    document.body.classList.remove("playing");
+    view.setLevel(0);
+    ball = createBall(levels[0]);
+    document
+      .querySelectorAll<HTMLElement>(".level-button")
+      .forEach(
+        (c, i) =>
+          (c.querySelector(".progress")!.textContent = completed.includes(i)
+            ? "★ 已归洞"
+            : "一杆挑战"),
+      );
+    requestAnimationFrame(() => view.resize());
+  }
+  function start(i: number) {
+    clearDrag();
+    index = i;
+    ball = createBall(levels[i]);
+    acc = 0;
+    winDelay = -1;
+    screen = "game";
+    document.body.classList.add("playing");
+    el("menu").hidden = true;
+    el("game").hidden = false;
+    el("result").hidden = true;
+    el("title").textContent = levels[i].name;
+    el("subtitle").textContent = `第 0${i + 1} 关 / 微缩世界`;
+    el("hint").textContent = levels[i].hint;
+    el("tutorial").hidden = tutorialSeen;
+    view.setLevel(i);
+    view.updateBall(ball, 0);
+    sound.unlock();
+    update();
+    requestAnimationFrame(() => view.resize());
+  }
+  function dismissTutorial() {
+    tutorialSeen = true;
+    el("tutorial").hidden = true;
+    try {
+      localStorage.setItem("golf-tutorial", "seen");
+    } catch {}
+  }
+  function update() {
+    const d = drag
+      ? Math.min(Math.hypot(drag.x - aim.x, drag.y - aim.y) / 150, 1)
+      : 0;
+    el("power").style.width = `${d * 100}%`;
+    el("percent").textContent = `${Math.round(d * 100)}%`;
+    el("shot").textContent =
+      ball.state === "ready" ? "● 一杆机会" : "○ 机会已使用";
+    el("status").textContent =
+      ball.state === "ready"
+        ? drag
+          ? "向后蓄力 · 松手出发！"
+          : "按住白球，向后拖拽"
+        : ball.state === "moving"
+          ? "滚动中… 看它的！"
+          : ball.state === "won"
+            ? "好球！正在归洞"
+            : "球停住了 · 再试一杆";
+  }
+  function result() {
+    el("result").hidden = false;
+    const won = ball.state === "won";
+    el("stars").textContent = won ? "✦ ★ ✦" : "↻";
+    el("result-label").textContent = won ? "ONE SHOT. PERFECT!" : "再来一杆";
+    el("result-title").textContent = won ? "一杆，归洞。" : "差一点也没关系。";
+    el("result-text").textContent = won
+      ? index === 2
+        ? "三个小世界，全部征服！"
+        : "漂亮！下一个小世界等着你。"
+      : "换个角度，或轻轻调整力度。";
+    el("next").hidden = !won || index === 2;
+    if (won && !completed.includes(index)) {
+      completed.push(index);
+      try {
+        localStorage.setItem("golf-progress", JSON.stringify(completed));
+      } catch {}
+    }
+    update();
+  }
+  document
+    .querySelectorAll<HTMLElement>("[data-level]")
+    .forEach((b) => (b.onclick = () => start(Number(b.dataset.level))));
+  el("start").onclick = () => start(0);
+  el("retry").onclick = el("retry-result").onclick = () => start(index);
+  el("back").onclick = el("home").onclick = el("result-menu").onclick = menu;
+  el("next").onclick = () => start(index + 1);
+  el("tutorial-close").onclick = dismissTutorial;
+  el("sound").onclick = () => {
+    sound.toggle();
+    syncSound();
+    try {
+      localStorage.setItem("golf-sound", sound.enabled ? "on" : "off");
+    } catch {}
+  };
+  canvas.onpointerdown = (e) => {
+    if (screen !== "game" || ball.state !== "ready" || drag || !e.isPrimary)
+      return;
+    const projected = view.project(ball.x, ball.y, 9);
+    if (Math.hypot(e.clientX - projected.x, e.clientY - projected.y) > 30)
+      return;
+    const p = view.planePoint(e.clientX, e.clientY, 9);
+    if (!p) return;
+    dismissTutorial();
+    sound.unlock();
+    canvas.setPointerCapture(e.pointerId);
+    drag = { ...p, id: e.pointerId };
+    aim = p;
+    update();
+  };
+  canvas.onpointermove = (e) => {
+    if (drag && drag.id === e.pointerId) {
+      const p = view.planePoint(e.clientX, e.clientY, 9);
+      if (p) {
+        aim = p;
+        view.showAim(ball, drag.x - aim.x, drag.y - aim.y);
+        update();
+      }
+    }
+  };
+  canvas.onpointerup = (e) => {
+    if (!drag || drag.id !== e.pointerId) return;
+    const p = view.planePoint(e.clientX, e.clientY, 9);
+    if (p) aim = p;
+    const dx = drag.x - aim.x,
+      dy = drag.y - aim.y;
+    shoot(ball, dx, dy);
+    if (ball.state === "moving") {
+      sound.play("shot", Math.min(Math.hypot(dx, dy) / 150, 1));
+      view.bump();
+    }
+    clearDrag();
+    update();
+  };
+  canvas.onpointercancel = () => {
+    clearDrag();
+    update();
+  };
+  canvas.onlostpointercapture = () => {
+    if (drag) {
+      drag = null;
+      view.clearAim();
+      update();
+    }
+  };
+  window.onkeydown = (e) => {
+    if ((e.target as HTMLElement).tagName === "BUTTON" && e.key === " ") return;
+    if (screen === "game" && e.key.toLowerCase() === "r") start(index);
+    if (e.key === "Escape") menu();
+  };
+  document.addEventListener("visibilitychange", () => {
+    last = performance.now();
+    acc = 0;
+    clearDrag();
+    update();
+  });
+  canvas.addEventListener("webglcontextlost", (e) => {
+    e.preventDefault();
+    el("webgl-error").hidden = false;
+  });
+  canvas.addEventListener("webglcontextrestored", () => location.reload());
+  function frame(t: number) {
+    const dt = Math.min(Math.max((t - last) / 1000, 0), 0.05);
+    last = t;
+    if (screen === "game") {
+      if (ball.state === "moving") {
+        acc += dt;
+        const bounces = ball.bounces;
+        while (acc >= STEP && ball.state === "moving") {
+          step(ball, levels[index]);
+          acc -= STEP;
+        }
+        if (ball.bounces > bounces) {
+          view.bump();
+          sound.play(
+            ball.surface || "wood",
+            Math.min(Math.hypot(ball.vx, ball.vy) / 400, 1),
+          );
+        }
+        const state = (ball as Ball).state;
+        if (state === "won") {
+          view.captureBall(ball);
+          sound.play("win");
+          winDelay = 0;
+          update();
+        } else if (state === "lost") {
+          result();
+        }
+      }
+      view.updateBall(ball, dt);
+      if (winDelay >= 0) {
+        winDelay += dt;
+        if (winDelay > 0.9) {
+          winDelay = -1;
+          result();
+        }
+      }
+    }
+    view.render(t / 1000, dt, screen === "menu");
+    requestAnimationFrame(frame);
+  }
+  // Generate tiny previews with the same models and camera as gameplay.
+  for (let i = 0; i < levels.length; i++) {
+    view.setLevel(i);
+    view.render(0, 0, true);
+    const thumbnail = document.createElement("canvas");
+    thumbnail.width = 280;
+    thumbnail.height = 170;
+    thumbnail.getContext("2d")!.drawImage(canvas, 0, 0, 280, 170);
+    document.querySelector<HTMLImageElement>(`[data-level="${i}"] img`)!.src =
+      thumbnail.toDataURL("image/png");
+  }
+  menu();
+  requestAnimationFrame(frame);
+  // Read-only projection diagnostics for browser tests; no physics mutations exposed.
+  if (import.meta.env.DEV) {
+    Object.defineProperty(window, "golfDebug", {
+      value: {
+        project: (x: number, y: number, h = 9) => view.project(x, y, h),
+        unproject: (x: number, y: number) => view.planePoint(x, y, 9),
+        state: () => ({ ...ball }),
+        visual: () => ({
+          scale: view.ball.scale.toArray(),
+          position: view.ball.position.toArray(),
+          rotation: view.ball.quaternion.toArray(),
+          particles: view.particles.children.length,
+          aim: view.aim.children.length,
+        }),
+        colliders: () => view.collisionBounds(),
+        renderer: () => ({
+          calls: view.renderer.info.render.calls,
+          triangles: view.renderer.info.render.triangles,
+          geometries: view.renderer.info.memory.geometries,
+        }),
+      },
+    });
+  }
 }
-function frame(t:number){const dt=Math.min((t-last)/1000,.05);last=t;if(screen==='game'){if(ball.state==='moving'){acc+=dt;while(acc>=STEP&&ball.state==='moving'){step(ball,levels[index]);acc-=STEP;}if(ball.state!=='moving')result();}draw();}requestAnimationFrame(frame);}menu();requestAnimationFrame(frame);
+boot();
