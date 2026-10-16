@@ -3,12 +3,13 @@ import { levels } from "./levels";
 import { createBall, shoot, step, STEP, type Ball } from "./physics";
 import { GolfScene } from "./scene";
 import { Sound } from "./audio";
+import { destinations } from "./world-map";
 function boot() {
   const app = document.querySelector<HTMLDivElement>("#app")!;
   app.innerHTML = `<div class="cloud cloud-a"></div><div class="cloud cloud-b"></div><div id="viewport"><canvas aria-label="立体高尔夫球场：按住白球向后拖拽，松手击球"></canvas></div>
-<header><button id="home" class="icon" aria-label="返回选关">⌂</button><span class="badge">一颗球 · 一次机会</span><button id="sound" class="icon" aria-label="关闭音效" aria-pressed="true">♫</button></header>
-<section id="menu"><div class="logo"><span class="logo-flag">⚑</span><h1>一杆<span>归洞</span><i>。</i></h1><p>ONE SHOT · TINY WORLDS</p></div><div class="menu-bottom"><button id="start" class="primary">开始游戏 <span>▶</span></button><div class="level-select" aria-label="选择关卡">${levels.map((l, i) => `<button class="level-button" data-level="${i}"><img alt="${l.name}微缩场景预览"><span><b>0${i + 1}</b> ${l.name}</span><small class="progress">一杆挑战</small></button>`).join("")}</div><small class="prototype">三关原型 · 拖拽白球，松手出发</small></div></section>
-<section id="game" hidden><div class="level-title"><span id="subtitle"></span><h2 id="title"></h2></div><div id="shot" class="shot">● 一杆机会</div><div id="tutorial" hidden><span class="hand">☝</span><strong>按住白球，向后拉</strong><span>松手击球 · 拉得越远越有力</span><button id="tutorial-close">知道了，试试看</button></div><div class="game-bottom"><div class="feedback"><span id="status" role="status" aria-live="polite">拖拽白球以瞄准</span><div class="power-row"><span>力度</span><div class="meter"><i id="power"></i></div><b id="percent">0%</b></div></div><div class="controls"><button id="retry">↻ 重新开始</button><button id="back">▦ 返回选关</button></div><p id="hint"></p></div></section>
+<header><button id="home" class="icon" aria-label="返回选关">⌂</button><button id="sound" class="icon" aria-label="关闭音效" aria-pressed="true">♫</button></header>
+<section id="menu"><div class="logo"><h1 aria-label="一杆归洞"><span>一</span><span>杆<i class="logo-flag">⚑</i></span><span>归</span><span>洞<i class="logo-ball"></i></span></h1><p>微 缩 世 界 <i>一杆出发！</i></p></div><div class="map-caption"><span>你的下一杆，落在哪个世界？</span></div><div id="map-labels">${destinations.map((d, i) => `<button class="map-label" data-level="${i}" aria-label="进入第${i + 1}关 ${d.title}"><span class="island-name">${d.theme}</span><strong>${d.title}</strong><small>${d.feature}</small><i class="progress"></i><b class="enter-mark">↗</b></button>`).join("")}</div><button id="start" class="wood-sign"><small>第一次来？</small><strong>从这里出发 <span>➜</span></strong></button><p class="map-help">点击小岛，开启一杆冒险 <span>· 也可用 Tab 选择，Enter 出发</span></p></section>
+<section id="game" hidden><div class="level-title"><span id="subtitle"></span><h2 id="title"></h2></div><div id="shot" class="shot">● 一杆机会</div><div id="tutorial" hidden><span class="hand">☝</span><strong>按住白球，向后拉</strong><span>松手击球 · 拉得越远越有力</span><button id="tutorial-close">知道了，试试看</button></div><div class="game-bottom"><div class="feedback"><span id="status" role="status" aria-live="polite">拖拽白球以瞄准</span><div class="power-row"><span class="tee-icon">⚑</span><div class="meter"><i id="power"></i><span class="meter-ticks"></span></div><b id="percent">0%</b></div></div><div class="controls"><button id="retry">↻ 重新开始</button><button id="back">▦ 返回选关</button></div><p id="hint"></p></div></section>
 <div id="result" hidden><div class="resultbox"><div id="stars">✦ ★ ✦</div><span id="result-label"></span><h2 id="result-title"></h2><p id="result-text"></p><div class="result-actions"><button id="next" class="primary">下一关 →</button><button id="retry-result">↻ 再试一次</button><button id="result-menu">返回选关</button></div></div></div><div id="webgl-error" hidden role="alert"><h2>这个小世界暂时无法打开</h2><p>游戏需要 WebGL。请使用较新的 Chrome、Edge、Firefox 或 Safari，并开启浏览器硬件加速后刷新页面。</p><button onclick="location.reload()">重新加载</button></div>`;
   const el = (id: string) => document.getElementById(id)!;
   const canvas = document.querySelector("canvas")!;
@@ -61,20 +62,24 @@ function boot() {
   function menu() {
     clearDrag();
     screen = "menu";
+    mapPress = null;
+    el("menu").classList.remove("departing");
+    canvas.style.cursor = "default";
     winDelay = -1;
     el("menu").hidden = false;
     el("game").hidden = true;
     el("result").hidden = true;
     document.body.classList.remove("playing");
-    view.setLevel(0);
+    view.showMap();
+    hover(-1);
     ball = createBall(levels[0]);
     document
-      .querySelectorAll<HTMLElement>(".level-button")
+      .querySelectorAll<HTMLElement>(".map-label")
       .forEach(
         (c, i) =>
           (c.querySelector(".progress")!.textContent = completed.includes(i)
-            ? "★ 已归洞"
-            : "一杆挑战"),
+            ? "★"
+            : ""),
       );
     requestAnimationFrame(() => view.resize());
   }
@@ -85,13 +90,19 @@ function boot() {
     acc = 0;
     winDelay = -1;
     screen = "game";
+    mapPress = null;
+    canvas.style.cursor = "crosshair";
     document.body.classList.add("playing");
     el("menu").hidden = true;
     el("game").hidden = false;
     el("result").hidden = true;
     el("title").textContent = levels[i].name;
     el("subtitle").textContent = `第 0${i + 1} 关 / 微缩世界`;
-    el("hint").textContent = levels[i].hint;
+    el("hint").textContent = [
+      "瞄准旗帜 · 松手击球",
+      "借上方墙壁反弹",
+      "穿过文具间的空隙",
+    ][i];
     el("tutorial").hidden = tutorialSeen;
     view.setLevel(i);
     view.updateBall(ball, 0);
@@ -145,10 +156,28 @@ function boot() {
     }
     update();
   }
-  document
-    .querySelectorAll<HTMLElement>("[data-level]")
-    .forEach((b) => (b.onclick = () => start(Number(b.dataset.level))));
-  el("start").onclick = () => start(0);
+  function enter(i: number) {
+    if (screen !== "menu" || !view.map?.enter(i)) return;
+    sound.unlock();
+    el("menu").classList.add("departing");
+  }
+  document.querySelectorAll<HTMLButtonElement>("[data-level]").forEach((b) => {
+    const i = Number(b.dataset.level);
+    b.onclick = () => enter(i);
+    b.onpointerenter = () => hover(i);
+    b.onpointerleave = () => hover(-1);
+    b.onfocus = () => hover(i);
+    b.onblur = () => hover(-1);
+  });
+  function hover(i: number) {
+    if (!view.map || view.map.transitioning) return;
+    view.map.hover(i);
+    document
+      .querySelectorAll("[data-level]")
+      .forEach((b, n) => b.classList.toggle("active", n === i));
+    canvas.style.cursor = i >= 0 ? "pointer" : "default";
+  }
+  el("start").onclick = () => enter(0);
   el("retry").onclick = el("retry-result").onclick = () => start(index);
   el("back").onclick = el("home").onclick = el("result-menu").onclick = menu;
   el("next").onclick = () => start(index + 1);
@@ -160,7 +189,16 @@ function boot() {
       localStorage.setItem("golf-sound", sound.enabled ? "on" : "off");
     } catch {}
   };
+  let mapPress: { id: number; x: number; y: number; level: number } | null =
+    null;
   canvas.onpointerdown = (e) => {
+    if (screen === "menu" && e.isPrimary) {
+      const level = view.map?.pick(e.clientX, e.clientY) ?? -1;
+      hover(level);
+      mapPress = { id: e.pointerId, x: e.clientX, y: e.clientY, level };
+      canvas.setPointerCapture(e.pointerId);
+      return;
+    }
     if (screen !== "game" || ball.state !== "ready" || drag || !e.isPrimary)
       return;
     const projected = view.project(ball.x, ball.y, 9);
@@ -176,6 +214,10 @@ function boot() {
     update();
   };
   canvas.onpointermove = (e) => {
+    if (screen === "menu" && e.pointerType !== "touch") {
+      hover(view.map?.pick(e.clientX, e.clientY) ?? -1);
+      return;
+    }
     if (drag && drag.id === e.pointerId) {
       const p = view.planePoint(e.clientX, e.clientY, 9);
       if (p) {
@@ -186,6 +228,21 @@ function boot() {
     }
   };
   canvas.onpointerup = (e) => {
+    if (screen === "menu") {
+      const p = mapPress;
+      mapPress = null;
+      if (
+        p &&
+        p.id === e.pointerId &&
+        p.level >= 0 &&
+        Math.hypot(p.x - e.clientX, p.y - e.clientY) < 18 &&
+        (view.map?.pick(e.clientX, e.clientY) ?? -1) === p.level
+      )
+        enter(p.level);
+      if (canvas.hasPointerCapture(e.pointerId))
+        canvas.releasePointerCapture(e.pointerId);
+      return;
+    }
     if (!drag || drag.id !== e.pointerId) return;
     const p = view.planePoint(e.clientX, e.clientY, 9);
     if (p) aim = p;
@@ -199,7 +256,12 @@ function boot() {
     clearDrag();
     update();
   };
+  canvas.onpointerleave = () => {
+    if (screen === "menu" && !mapPress) hover(-1);
+  };
   canvas.onpointercancel = () => {
+    mapPress = null;
+    hover(-1);
     clearDrag();
     update();
   };
@@ -229,6 +291,20 @@ function boot() {
   function frame(t: number) {
     const dt = Math.min(Math.max((t - last) / 1000, 0), 0.05);
     last = t;
+    if (screen === "menu" && view.map) {
+      const destination = view.map.update(t / 1000, dt);
+      const offset = el("app").getBoundingClientRect();
+      document.querySelectorAll<HTMLElement>("[data-level]").forEach((b, i) => {
+        const p = view.map!.anchor(i, true);
+        b.style.left = `${p.x - offset.left}px`;
+        b.style.top = `${p.y - offset.top}px`;
+      });
+      const p = view.map.anchor(0);
+      el("start").style.left = `${p.x - offset.left + 100}px`;
+      el("start").style.top =
+        `${Math.min(p.y - offset.top + 120, innerHeight - 95)}px`;
+      if (destination !== null) start(destination);
+    }
     if (screen === "game") {
       if (ball.state === "moving") {
         acc += dt;
@@ -266,17 +342,6 @@ function boot() {
     view.render(t / 1000, dt, screen === "menu");
     requestAnimationFrame(frame);
   }
-  // Generate tiny previews with the same models and camera as gameplay.
-  for (let i = 0; i < levels.length; i++) {
-    view.setLevel(i);
-    view.render(0, 0, true);
-    const thumbnail = document.createElement("canvas");
-    thumbnail.width = 280;
-    thumbnail.height = 170;
-    thumbnail.getContext("2d")!.drawImage(canvas, 0, 0, 280, 170);
-    document.querySelector<HTMLImageElement>(`[data-level="${i}"] img`)!.src =
-      thumbnail.toDataURL("image/png");
-  }
   menu();
   requestAnimationFrame(frame);
   // Read-only projection diagnostics for browser tests; no physics mutations exposed.
@@ -286,6 +351,9 @@ function boot() {
         project: (x: number, y: number, h = 9) => view.project(x, y, h),
         unproject: (x: number, y: number) => view.planePoint(x, y, 9),
         state: () => ({ ...ball }),
+        menu: () => view.map?.snapshot(),
+        island: (i: number) => view.map?.anchor(i),
+        pick: (x: number, y: number) => view.map?.pick(x, y),
         visual: () => ({
           scale: view.ball.scale.toArray(),
           position: view.ball.position.toArray(),

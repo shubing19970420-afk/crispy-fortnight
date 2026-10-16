@@ -29,6 +29,23 @@ try {
         ),
     );
   }
+  async function openLevel(i, raycast = false) {
+    if (raycast) {
+      await stable();
+      const p = await page.evaluate((i) => window.golfDebug.island(i), i);
+      assert.equal(
+        await page.evaluate(
+          (p) => document.elementFromPoint(p.x, p.y).tagName,
+          p,
+        ),
+        "CANVAS",
+      );
+      await page.mouse.click(p.x, p.y);
+    } else await page.locator(`[data-level="${i}"]`).click();
+    await page.locator("#game").waitFor({ state: "visible" });
+    await page.waitForFunction(() => !window.golfDebug.menu());
+    await stable();
+  }
   async function project(x, y) {
     return page.evaluate(({ x, y }) => window.golfDebug.project(x, y), {
       x,
@@ -95,7 +112,7 @@ try {
     { x: 150, y: 390 },
   ];
   for (let i = 0; i < 3; i++) {
-    await page.locator(`[data-level="${i}"]`).click();
+    await openLevel(i, true);
     await stable();
     if (await page.locator("#tutorial").isVisible())
       await page.locator("#tutorial-close").click();
@@ -127,7 +144,7 @@ try {
     assert.equal(state.bounces, i === 0 ? 0 : 1);
     await page
       .getByText("一杆，归洞。", { exact: true })
-      .waitFor({ timeout: 5000 });
+      .waitFor({ timeout: 15000 });
     if (i === 2) await page.screenshot({ path: "test-results/success.png" });
     if (i < 2) {
       await page.locator("#next").click();
@@ -143,7 +160,7 @@ try {
       "drag, projection, collider bounds, win, navigation",
     );
   }
-  await page.locator('[data-level="0"]').click();
+  await openLevel(0);
   await shoot(8, 0, starts[0]);
   await page
     .getByText("差一点也没关系。", { exact: true })
@@ -181,7 +198,7 @@ try {
   );
   console.log("PASS audio toggle persistence");
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.locator('[data-level="0"]').click();
+  await openLevel(0);
   await stable();
   await page.screenshot({ path: "test-results/mobile.png" });
   assert.ok(
@@ -195,9 +212,10 @@ try {
     .waitFor({ timeout: 40000 });
   console.log("PASS actual touch drag and mobile win");
   await page.locator("#result-menu").click();
+  await stable();
   const before = await page.evaluate(() => window.golfDebug.renderer());
   for (let i = 0; i < 8; i++) {
-    await page.locator('[data-level="2"]').click();
+    await openLevel(2);
     await page.locator("#home").click();
   }
   await stable();

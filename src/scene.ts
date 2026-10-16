@@ -1,4 +1,5 @@
 import * as T from "three";
+import { WorldMap } from "./world-map";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { levels, WIDTH, HEIGHT, type Level, type Rect } from "./levels";
 import { createBall, shoot, step, STEP, R, type Ball } from "./physics";
@@ -9,6 +10,7 @@ const cream = 0xfff3cf,
   coral = 0xf47c59;
 export class GolfScene {
   renderer: T.WebGLRenderer;
+  map?: WorldMap;
   scene = new T.Scene();
   camera = new T.OrthographicCamera();
   root = new T.Group();
@@ -89,7 +91,7 @@ export class GolfScene {
     this.resizeObserver.observe(canvas.parentElement!);
     this.setLevel(0);
   }
-  private material(color: T.ColorRepresentation) {
+  material(color: T.ColorRepresentation) {
     return new T.MeshStandardMaterial({
       color,
       roughness: 0.88,
@@ -97,7 +99,7 @@ export class GolfScene {
       flatShading: true,
     });
   }
-  private mesh(
+  mesh(
     geo: T.BufferGeometry,
     color: T.ColorRepresentation,
     x: number,
@@ -112,7 +114,7 @@ export class GolfScene {
     parent.add(m);
     return m;
   }
-  private box(
+  box(
     w: number,
     h: number,
     d: number,
@@ -180,7 +182,7 @@ export class GolfScene {
     m.position.set(x, y, z);
     this.root.add(m);
   }
-  setLevel(index: number) {
+  private clearLevel() {
     this.root.traverse((o) => {
       if (o instanceof T.Mesh || o instanceof T.Line) {
         o.geometry.dispose();
@@ -197,6 +199,22 @@ export class GolfScene {
     this.capture = undefined;
     this.burstTime = -1;
     this.lastBall = undefined;
+  }
+  showMap() {
+    this.clearLevel();
+    this.root.visible = false;
+    this.map?.dispose();
+    this.map = new WorldMap(this);
+    this.resize();
+  }
+  setLevel(index: number) {
+    this.map?.dispose();
+    this.map = undefined;
+    this.root.visible = true;
+    this.camera.zoom = 1;
+    this.camera.position.set(480, 1050, 1150);
+    this.camera.lookAt(0, 0, 0);
+    this.clearLevel();
     const l = (this.level = levels[index]),
       office = !!l.office;
     this.box(900, 54, 560, office ? 0xb98760 : 0xb78c64, 0, -37, 0, 12);
@@ -477,6 +495,10 @@ export class GolfScene {
     const r = this.canvas.parentElement!.getBoundingClientRect();
     if (r.width < 1 || r.height < 1) return;
     this.renderer.setSize(r.width, r.height, false);
+    if (this.map) {
+      this.map.layout();
+      return;
+    }
     const aspect = r.width / r.height;
     this.camera.updateMatrixWorld();
     let minX = Infinity,
@@ -628,23 +650,10 @@ export class GolfScene {
   bump() {
     this.impact = 0.15;
   }
-  render(t: number, dt: number, menu: boolean) {
+  render(t: number, dt: number, _menu: boolean) {
     if (this.flagMesh) {
       this.flagMesh.rotation.y = Math.sin(t * 2) * 0.14;
       this.flagMesh.rotation.z = Math.sin(t * 1.8) * 0.035;
-    }
-    if (menu) {
-      const a = t * 0.55;
-      this.ball.position.copy(
-        world(
-          this.level.start.x + Math.sin(a) * 45,
-          this.level.start.y + Math.cos(a) * 20,
-          R,
-        ),
-      );
-      this.ball.rotation.z = -a;
-      this.shadow.position.copy(this.ball.position);
-      this.shadow.position.y = 0.7;
     }
     if (this.burstTime >= 0) {
       this.burstTime += dt;
