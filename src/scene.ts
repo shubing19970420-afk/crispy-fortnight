@@ -18,6 +18,7 @@ export class GolfScene {
   ball = new T.Group();
   flag = new T.Group();
   aim = new T.Group();
+  route = new T.Group();
   particles = new T.Group();
   colliders: { rect: Rect; mesh: T.Object3D }[] = [];
   private course?: CourseModels;
@@ -187,6 +188,7 @@ export class GolfScene {
   private clearLevel() {
     this.root.traverse((o) => {
       if (o instanceof T.Mesh || o instanceof T.Line) {
+        if(o instanceof T.InstancedMesh) o.dispose();
         o.geometry.dispose();
         const ms = Array.isArray(o.material) ? o.material : [o.material];
         for (const m of ms) {
@@ -357,6 +359,8 @@ export class GolfScene {
     this.root.add(this.shadow);
     this.aim = new T.Group();
     this.root.add(this.aim);
+    this.route = new T.Group();
+    this.root.add(this.route);
     this.particles = new T.Group();
     this.root.add(this.particles);
     this.updateBall(createBall(l), 0);
@@ -565,6 +569,34 @@ export class GolfScene {
   }
   clearAim() {
     this.showAim(createBall(this.level), 0, 0);
+  }
+  showRoute(points: {x:number;y:number}[] = []) {
+    for(const o of this.route.children) {
+      if(o instanceof T.InstancedMesh) o.dispose();
+      const line=o as T.Line; line.geometry.dispose(); (line.material as T.Material).dispose();
+    }
+    this.route.clear();
+    if(points.length<2) return;
+    const path=points.map(p=>world(p.x,p.y,3.5));
+    const distances=[0];
+    for(let i=1;i<path.length;i++) distances.push(distances[i-1]+path[i].distanceTo(path[i-1]));
+    const total=distances.at(-1)!;
+    const at=(d:number)=>{
+      let i=1;while(i<distances.length-1 && distances[i]<d) i++;
+      return path[i-1].clone().lerp(path[i],(d-distances[i-1])/(distances[i]-distances[i-1]||1));
+    };
+    const count=Math.ceil(total/22), up=new T.Vector3(0,1,0);
+    for(const [radius,opacity,color] of [[3.8,.16,0xfff3ad],[1.6,.85,0xfff3ad]]) {
+      const dashes=new T.InstancedMesh(new T.CylinderGeometry(radius,radius,1,6),new T.MeshBasicMaterial({color,transparent:true,opacity,depthWrite:false}),count);
+      const dummy=new T.Object3D();
+      for(let i=0;i<count;i++) {
+        const a=at(i*22),b=at(Math.min(i*22+12,total)),direction=b.clone().sub(a);
+        dummy.position.copy(a).add(b).multiplyScalar(.5);
+        dummy.quaternion.setFromUnitVectors(up,direction.clone().normalize());
+        dummy.scale.set(1,direction.length(),1); dummy.updateMatrix(); dashes.setMatrixAt(i,dummy.matrix);
+      }
+      dashes.instanceMatrix.needsUpdate=true;this.route.add(dashes);
+    }
   }
   captureBall(b: Ball) {
     this.capture = { x: b.x, y: b.y, t: 0 };

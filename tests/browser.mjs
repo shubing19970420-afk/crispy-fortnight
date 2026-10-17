@@ -153,10 +153,10 @@ try {
         "overhead desk fades near hole",
       );
     await page
-      .getByText("一杆，归洞。", { exact: true })
+      .getByText("一杆归洞！", { exact: true })
       .waitFor({ timeout: 15000 });
     assert.ok(
-      (await page.locator("#result-text").textContent()).includes("最佳"),
+      (await page.locator("#result-stats").textContent()).includes("最佳"),
     );
     if (i === 2) await page.screenshot({ path: "test-results/success.png" });
     if (i < 2) {
@@ -208,7 +208,7 @@ try {
   await openLevel(0);
   await shoot(8, 0, starts[0]);
   await page
-    .getByText("差一点也没关系。", { exact: true })
+    .getByText("再来一杆！", { exact: true })
     .waitFor({ timeout: 10000 });
   await page.locator("#retry-result").click();
   assert.ok(await page.locator("#result").isHidden());
@@ -253,7 +253,7 @@ try {
   );
   await shoot(solutions[0].dx, solutions[0].dy, starts[0], true);
   await page
-    .getByText("一杆，归洞。", { exact: true })
+    .getByText("一杆归洞！", { exact: true })
     .waitFor({ timeout: 40000 });
   console.log("PASS actual touch drag and mobile win");
   await page.locator("#result-menu").click();

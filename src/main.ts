@@ -4,13 +4,24 @@ import { createBall, shoot, step, STEP, type Ball } from "./physics";
 import { GolfScene } from "./scene";
 import { Sound } from "./audio";
 import { destinations } from "./world-map";
+import { type Route } from "./route-hints";
+import { victory, readScores } from "./records";
 function boot() {
   const app = document.querySelector<HTMLDivElement>("#app")!;
   app.innerHTML = `<div class="cloud cloud-a"></div><div class="cloud cloud-b"></div><div id="viewport"><canvas aria-label="立体高尔夫球场：按住白球向后拖拽，松手击球"></canvas></div>
 <header><button id="home" class="icon" aria-label="返回选关">⌂</button><button id="sound" class="icon" aria-label="关闭音效" aria-pressed="true">♫</button></header>
-<section id="menu"><div class="logo"><h1 aria-label="一杆归洞"><span>一</span><span>杆<i class="logo-flag">⚑</i></span><span>归</span><span>洞<i class="logo-ball"></i></span></h1><p>微 缩 世 界 <i>一杆出发！</i></p></div><div class="map-caption"><span>你的下一杆，落在哪个世界？</span></div><div id="map-labels">${destinations.map((d, i) => `<button class="map-label" data-level="${i}" aria-label="进入第${i + 1}关 ${d.title}"><span class="island-name">${d.theme}</span><strong>${d.title}</strong><small>${d.feature}</small><i class="progress"></i><b class="enter-mark">↗</b></button>`).join("")}</div><button id="start" class="wood-sign"><small>第一次来？</small><strong>从这里出发 <span>➜</span></strong></button><p class="map-help">点击小岛，开启一杆冒险 <span>· 也可用 Tab 选择，Enter 出发</span></p></section>
-<section id="game" hidden><div class="level-title"><span id="subtitle"></span><h2 id="title"></h2></div><div id="shot" class="shot">● 一杆机会</div><div id="tutorial" hidden><span class="hand">☝</span><strong>按住白球，向后拉</strong><span>松手击球 · 拉得越远越有力</span><button id="tutorial-close">知道了，试试看</button></div><div class="game-bottom"><div class="feedback"><span id="status" role="status" aria-live="polite">拖拽白球以瞄准</span><div class="power-row"><span class="tee-icon">⚑</span><div class="meter"><i id="power"></i><span class="meter-ticks"></span></div><b id="percent">0%</b></div></div><div class="controls"><button id="retry">↻ 重新开始</button><button id="back">▦ 返回选关</button></div><p id="hint"></p></div></section>
-<div id="result" hidden><div class="resultbox"><div id="stars">✦ ★ ✦</div><span id="result-label"></span><h2 id="result-title"></h2><p id="result-text"></p><div class="result-actions"><button id="next" class="primary">下一关 →</button><button id="retry-result">↻ 再试一次</button><button id="result-menu">返回选关</button></div></div></div><div id="webgl-error" hidden role="alert"><h2>这个小世界暂时无法打开</h2><p>游戏需要 WebGL。请使用较新的 Chrome、Edge、Firefox 或 Safari，并开启浏览器硬件加速后刷新页面。</p><button onclick="location.reload()">重新加载</button></div>`;
+<section id="menu"><div class="logo"><h1 aria-label="一杆归洞"><span>一</span><span>杆<i class="logo-flag">⚑</i></span><span>归</span><span>洞<i class="logo-ball"></i></span></h1><p>微 缩 世 界 <i>一杆出发！</i></p></div><div class="map-caption"><span>你的下一杆，落在哪个世界？</span></div><div id="map-labels">${destinations.map((d, i) => `<button class="map-label" data-level="${i}" aria-label="进入第${i + 1}关 ${d.title}"><span class="island-name">${d.theme}</span><strong>${d.title}</strong><small>${d.feature}</small><i class="progress"></i><b class="enter-mark">↗</b></button>`).join("")}</div><button id="start" class="wood-sign"><small>第一次来？</small><strong>从这里出发 <span>➜</span></strong></button><button id="menu-assist" class="assist-setting" aria-pressed="false">⚑ 办公室路线辅助：关闭</button><p class="map-help">点击小岛，开启一杆冒险 <span>· 也可用 Tab 选择，Enter 出发</span></p></section>
+<section id="game" hidden><div class="level-title"><span id="subtitle"></span><h2 id="title"></h2></div><div id="shot" class="shot">● 一杆机会</div><div id="tutorial" hidden><span class="hand">☝</span><strong>按住白球，向后拉</strong><span>松手击球 · 拉得越远越有力</span><button id="tutorial-close">知道了，试试看</button></div><div class="game-bottom"><div class="feedback"><span id="status" role="status" aria-live="polite">拖拽白球以瞄准</span><div class="power-row"><span class="tee-icon">⚑</span><div class="meter"><i id="power"></i><span class="meter-ticks"></span></div><b id="percent">0%</b></div></div><div class="controls"><button id="retry">↻ 重新开始</button><button id="back">▦ 返回选关</button><button id="route-toggle" hidden aria-pressed="false">⚑ 显示推荐路线</button></div><p id="hint"></p><div id="route-help" hidden role="status"><span id="route-message"></span><button id="offer-route" hidden>显示推荐路线</button></div></div></section>
+<div id="result" hidden><div class="resultbox" role="dialog" aria-modal="true" aria-labelledby="result-title"><div class="ribbon-confetti" aria-hidden="true"><i style="--n:0">★</i><i style="--n:1">▪</i><i style="--n:2">▪</i><i style="--n:3">★</i><i style="--n:4">▪</i><i style="--n:5">▪</i><i style="--n:6">★</i><i style="--n:7">▪</i><i style="--n:8">▪</i><i style="--n:9">★</i><i style="--n:10">▪</i><i style="--n:11">▪</i></div><div id="stars">✦ ★ ✦</div><span id="result-label"></span><h2 id="result-title"></h2><p id="result-text"></p><div id="result-stats" hidden><div><small>本次用时</small><strong id="score-time"></strong></div><div><small>历史最佳</small><strong id="score-best"></strong></div><div><small>反弹次数</small><strong id="score-bounces"></strong></div></div><div id="result-route-offer" hidden><span>需要一点路线提示吗？</span><button id="result-route">显示推荐路线</button></div><div class="result-actions"><button id="next" class="primary">下一关 →</button><button id="retry-result">↻ 再试一次</button><button id="result-menu">返回选关</button></div></div></div><div id="webgl-error" hidden role="alert"><h2>这个小世界暂时无法打开</h2><p>游戏需要 WebGL。请使用较新的 Chrome、Edge、Firefox 或 Safari，并开启浏览器硬件加速后刷新页面。</p><button onclick="location.reload()">重新加载</button></div>`;
+  // The exact supplied PNG is optional until its original binary is attached.
+  // No network placeholder, regenerated art or broken-image request.
+  const logoAssets=import.meta.glob<string>('./assets/game-logo.png',{eager:true,query:'?url',import:'default'});
+  const logoUrl=logoAssets['./assets/game-logo.png'];
+  if(logoUrl) {
+    const logo=document.querySelector<HTMLElement>('.logo')!;
+    const image=document.createElement('img'); image.src=logoUrl; image.alt='一杆归洞'; image.className='official-logo';
+    logo.querySelector('h1')!.replaceWith(image); logo.classList.add('has-official-logo');
+  }
   const el = (id: string) => document.getElementById(id)!;
   const canvas = document.querySelector("canvas")!;
   let view: GolfScene;
@@ -33,11 +44,23 @@ function boot() {
     winDelay = -1,
     tutorialSeen = false;
   const sound = new Sound();
+  // Reuse one worker: expensive unsuccessful searches never block pointer input.
+  const routeWorker=new Worker(new URL('./route-worker.ts',import.meta.url),{type:'module'});
+  let generation=0, searching=false, workerAvailable=true;
+  routeWorker.onmessage=(e:MessageEvent<{route:Route|null;time:number;generation:number}>)=>{
+    searching=false;
+    if(e.data.generation!==generation || screen!=="game" || index!==2 || !assist || ball.state!=="ready") return;
+    route=e.data.route && ball.time-e.data.time<=.5?e.data.route:null;
+    view.showRoute(route?.points);
+    el("route-message").textContent=route?`推荐力度 ${Math.round(route.power/150*100)}% · 朝虚线首段出杆 · 当前时机可行`:"同事正在经过，稍等出杆窗口…";
+  };
+  routeWorker.onerror=()=>{workerAvailable=false;searching=false;route=null;view.showRoute();el("route-message").textContent="路线辅助暂不可用，请重载后再试";};
   let completed: number[] = [];
+  let settled=false, assist=false, failures=[0,0,0], nextHint=0, route:Route|null=null, scoreFrame=0;
+  try { assist=localStorage.getItem("golf-assist")==="on"; const f=JSON.parse(localStorage.getItem("golf-failures")||"[]"); failures=failures.map((_,i)=>Number.isSafeInteger(f?.[i])&&f[i]>=0?f[i]:0); } catch {}
   let best: Record<string, number> = {};
   try {
-    best = JSON.parse(localStorage.getItem("golf-best-v4") || "{}");
-    if (!best || typeof best !== "object") best = {};
+    best = readScores(localStorage.getItem("golf-best-v4"));
   } catch {}
   try {
     const saved: unknown = JSON.parse(
@@ -65,6 +88,9 @@ function boot() {
     view.clearAim();
   }
   function menu() {
+    cancelAnimationFrame(scoreFrame);
+    generation++;
+    syncAssist();
     clearDrag();
     screen = "menu";
     mapPress = null;
@@ -90,6 +116,8 @@ function boot() {
   }
   function start(i: number) {
     clearDrag();
+    cancelAnimationFrame(scoreFrame);
+    settled=false; route=null; nextHint=0; generation++;
     index = i;
     ball = createBall(levels[i]);
     acc = 0;
@@ -111,6 +139,7 @@ function boot() {
     el("tutorial").hidden = tutorialSeen;
     view.setLevel(i);
     view.updateBall(ball, 0);
+    syncAssist();
     sound.unlock();
     update();
     requestAnimationFrame(() => view.resize());
@@ -146,37 +175,56 @@ function boot() {
             : "球停住了 · 再试一杆";
   }
   function result() {
-    el("result").hidden = false;
-    const won = ball.state === "won";
-    el("stars").textContent = won ? "✦ ★ ✦" : "↻";
-    el("result-label").textContent = won ? "ONE SHOT. PERFECT!" : "再来一杆";
-    el("result-title").textContent = won ? "一杆，归洞。" : "差一点也没关系。";
-    el("result-text").textContent = won
-      ? index === 2
-        ? "三个小世界，全部征服！"
-        : "漂亮！下一个小世界等着你。"
-      : "换个角度，或轻轻调整力度。";
-    if (won) {
-      const seconds = ball.time - ball.shotAt,
-        key = String(index);
-      if (!Number.isFinite(best[key]) || seconds < best[key]) {
-        best[key] = seconds;
-        try {
-          localStorage.setItem("golf-best-v4", JSON.stringify(best));
-        } catch {}
-      }
-      el("result-text").textContent =
-        `${index === 2 ? "三关完成！ " : ""}滚动 ${seconds.toFixed(2)} 秒 · 反弹 ${ball.bounces} 次 · 最佳 ${best[key].toFixed(2)} 秒`;
-    }
-    el("next").hidden = !won || index === 2;
-    if (won && !completed.includes(index)) {
-      completed.push(index);
-      try {
-        localStorage.setItem("golf-progress-v4", JSON.stringify(completed));
-      } catch {}
-    }
-    update();
+    if(settled) return;
+    settled=true;
+    el("result").hidden=false;
+    const won=ball.state==="won";
+    el("result").classList.toggle("victory",won);
+    el("result").classList.remove("new-record");
+    el("stars").textContent=won?"✦ ★ ✦":"↻";
+    el("result-title").textContent=won?"一杆归洞！":"再来一杆！";
+    el("result-label").textContent="换个角度，再试试看";
+    el("result-text").textContent=won?(index===2?"三个小世界，全部征服！":"漂亮！下一个小世界等着你。"):"轻轻调整方向或力度。";
+    el("result-stats").hidden=!won;
+    if(won) {
+      const score=victory(ball.time-ball.shotAt,best[String(index)]);
+      best[String(index)]=score.best;
+      el("result-label").textContent={first:"首次通关！",record:"NEW RECORD！新纪录！",success:"挑战成功！"}[score.kind];
+      el("result").classList.toggle("new-record",score.kind==="record");
+      el("score-best").textContent=score.best.toFixed(2)+" 秒";
+      el("score-bounces").textContent=String(ball.bounces)+" 次";
+      const began=performance.now();
+      const count=(t:number)=>{ const progress=matchMedia('(prefers-reduced-motion: reduce)').matches?1:Math.min((t-began)/420,1); el("score-time").textContent=(score.seconds*(1-(1-progress)**3)).toFixed(2)+" 秒"; if(progress<1) scoreFrame=requestAnimationFrame(count); };
+      scoreFrame=requestAnimationFrame(count);
+      failures[index]=0;
+      if(!completed.includes(index)) completed.push(index);
+      try { localStorage.setItem("golf-best-v4",JSON.stringify(best)); localStorage.setItem("golf-progress-v4",JSON.stringify(completed)); } catch {}
+    } else failures[index]++;
+    try {localStorage.setItem("golf-failures",JSON.stringify(failures));} catch {}
+    el("result-route-offer").hidden=won||index!==2||failures[2]<3||assist;
+    el("next").hidden=!won||index===2;
+    syncAssist(); update();
   }
+  function syncAssist() {
+    el("menu-assist").textContent=`⚑ 办公室路线辅助：${assist?"开启":"关闭"}`;
+    el("menu-assist").setAttribute("aria-pressed",String(assist));
+    el("route-toggle").hidden=index!==2;
+    el("route-toggle").textContent=assist?"⚑ 关闭路线":"⚑ 显示推荐路线";
+    el("route-toggle").setAttribute("aria-pressed",String(assist));
+    const offer=index===2&&!assist&&failures[2]>=3;
+    el("route-help").hidden=screen!=="game"||index!==2||(!assist&&!offer);
+    el("offer-route").hidden=!offer;
+    if(offer) el("route-message").textContent="需要一点路线提示吗？";
+    if(!assist) {route=null; view.showRoute();}
+    else el("route-message").textContent="正在验证当前出杆窗口…";
+  }
+  function toggleAssist() {
+    assist=!assist; nextHint=0; generation++;
+    try {localStorage.setItem("golf-assist",assist?"on":"off");} catch {}
+    syncAssist();
+  }
+  el("result-route").onclick=()=>{if(!assist) toggleAssist();start(index);};
+  el("menu-assist").onclick=el("route-toggle").onclick=el("offer-route").onclick=toggleAssist;
   function enter(i: number) {
     if (screen !== "menu" || !view.map?.enter(i)) return;
     sound.unlock();
@@ -271,6 +319,8 @@ function boot() {
       dy = drag.y - aim.y;
     shoot(ball, dx, dy);
     if (ball.state === "moving") {
+      view.showRoute();
+      el("route-help").hidden=true;
       sound.play("shot", Math.min(Math.hypot(dx, dy) / 150, 1));
       view.bump();
     }
@@ -332,6 +382,14 @@ function boot() {
       if (destination !== null) start(destination);
     }
     if (screen === "game") {
+      if(index===2 && assist && ball.state==="ready" && ball.time>=nextHint) {
+        if(route && ball.time-route.launchAt>.5) {route=null; view.showRoute();el("route-message").textContent="正在验证当前出杆窗口…";}
+        if(!searching && workerAvailable) {
+          nextHint=ball.time+.25; searching=true;
+          routeWorker.postMessage({level:levels[index],time:ball.time,generation});
+        }
+        el("route-help").hidden=false;
+      }
       if (ball.state === "moving" || ball.state === "ready") {
         acc += dt;
         const bounces = ball.bounces;
@@ -390,6 +448,7 @@ function boot() {
           particles: view.particles.children.length,
           aim: view.aim.children.length,
         }),
+        hint: () => route ? {angle:route.angle,power:route.power,launchAt:route.launchAt,points:route.points.length} : null,
         colliders: () => view.collisionBounds(),
         course: () => view.courseSnapshot(),
         renderer: () => ({
