@@ -30,6 +30,7 @@ type Island = {
   chair?: T.Group;
   person?: T.Group;
   lift: number;
+  liftVelocity: number;
 };
 /** A separate menu mode, sharing the gameplay renderer, lighting and model builders. */
 export class WorldMap {
@@ -176,7 +177,7 @@ export class WorldMap {
     hit.scale.z = 0.82;
     hit.userData.level = i;
     g.add(hit);
-    const island: Island = { group: g, hit, trees: [], lift: 0 };
+    const island: Island = { group: g, hit, trees: [], lift: 0, liftVelocity: 0 };
     this.islands.push(island);
     if (i === 0) {
       this.box(210, 1, 120, 0x9ed977, -12, 3.6, 3, g, 10);
@@ -441,7 +442,12 @@ export class WorldMap {
     for (let i = 0; i < 3; i++) {
       const s = this.islands[i],
         active = i === this.hovered;
-      s.lift = T.MathUtils.damp(s.lift, active ? 18 : 0, 9, dt);
+      // Only menu feedback: a small damped spring, independent of ball physics.
+      for(let n=0;n<3;n++) {
+        s.liftVelocity += ((active ? 18 : 0)-s.lift)*180*dt/3;
+        s.liftVelocity *= Math.exp(-16*dt/3);
+        s.lift += s.liftVelocity*dt/3;
+      }
       s.group.position.y = s.group.userData.baseY + s.lift;
       const scale = T.MathUtils.damp(
         s.group.scale.x,

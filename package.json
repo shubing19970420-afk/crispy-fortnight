@@ -8,9 +8,10 @@
     "build": "tsc && vite build",
     "preview": "vite preview --host 0.0.0.0",
     "test": "tsx tests/physics.test.ts && tsx tests/assistance.test.ts",
-    "test:browser": "npm test && node tests/browser.mjs && node tests/visibility.mjs && node tests/rewards.mjs",
+    "test:browser": "npm test && node tests/browser.mjs && node tests/visibility.mjs && node tests/rewards.mjs && node tests/toy-ui.mjs",
     "test:menu": "node tests/menu.mjs",
-    "test:rewards": "node tests/rewards.mjs"
+    "test:rewards": "node tests/rewards.mjs",
+    "test:ui": "node tests/toy-ui.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.0",
