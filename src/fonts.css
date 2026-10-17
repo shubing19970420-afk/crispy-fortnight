@@ -34,7 +34,7 @@
 }
 :root {
   --font-title: "Maoken Assorted Sans", "Title Loading Fallback", HuangYou, sans-serif;
-  /* FangYuan VF is pending its official package and embedding license. */
+  /* Approved body face: licensed local ZCOOL QingKe HuangYou, static Regular. */
   --font-body: HuangYou, sans-serif;
   --font-body-weight: 400;
   --font-body-emphasis: 400;

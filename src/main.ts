@@ -186,8 +186,8 @@ function boot() {
     el("result").classList.remove("new-record");
     el("stars").textContent=won?"✦ ★ ✦":"↻";
     el("result-title").textContent=won?"一杆归洞！":"再来一杆！";
-    el("result-label").textContent="换个角度，再试试看";
-    el("result-text").textContent=won?(index===2?"三个小世界，全部征服！":"漂亮！下一个小世界等着你。"):"轻轻调整方向或力度。";
+    el("result-label").textContent="";
+    el("result-text").textContent=won?"":"调整方向或力度再试。";
     el("result-stats").hidden=!won;
     if(won) {
       const score=victory(ball.time-ball.shotAt,best[String(index)]);

@@ -16,14 +16,13 @@
     "conversion": "FontTools 4.61.1; WOFF2 with no glyph transforms, subsetting, renaming or metadata changes; original SFNT tables verified except head checksum and WOFF2 compression flag. See OFL FAQ 2.2, 2.7 and 2.8."
   },
   "body": {
-    "requested": "Alimama FangYuanTi VF",
-    "status": "pending-official-font-and-license",
-    "reason": "Official fonts.alibabagroup.com and font download domains return network access 403. No third-party font was downloaded.",
-    "activeFallback": "HuangYou",
+    "family": "ZCOOL QingKe HuangYou",
+    "status": "approved-local-body-font",
+    "source": "https://github.com/google/fonts/tree/main/ofl/zcoolqingkehuangyou",
+    "localFile": "HuangYou.woff2",
     "fontWeight": 400,
     "emphasisWeight": 400,
     "license": "SIL OFL 1.1",
-    "licenseFile": "HuangYou-OFL.txt",
-    "requiredFiles": "Official WOFF2 or TTF variable font and its accompanying embedding/redistribution license."
+    "licenseFile": "HuangYou-OFL.txt"
   }
 }
