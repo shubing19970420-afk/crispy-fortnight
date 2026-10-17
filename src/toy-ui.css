@@ -153,7 +153,6 @@ header .icon.muted::after { display: none; }
 #route-help { position: static; transform: none; width: auto; max-width: none; background: none; box-shadow: none; border-radius: 0; padding: 0; margin: 0 0 8px; font: 400 16px/1.3 var(--font-body); color: var(--toy-pine); }
 #route-message { display: block; }
 #route-toggle, #offer-route { margin: 8px 0 0; width: 100%; font-size: 19px; min-height: 44px; padding: 8px 12px; }
-.route-open.playing #viewport { bottom: 345px; }
 /* Native dialog keeps the field inert while paused; controls cycle inside the frame. */
 #settings {
   width: 460px; max-width: calc(100vw - 36px); max-height: calc(100dvh - 40px); overflow: auto;
@@ -214,7 +213,6 @@ header .icon.muted::after { display: none; }
   #route-dock { min-width: 0; }
   #route-drawer span { margin-left: 1px; }
   #route-content { bottom: calc(100% + 100px); width: 320px; right: 0; }
-  .route-open.playing #viewport { bottom: 377px; }
   #tutorial strong { font-size: 15px; }
   #tutorial-close { font-size: 13px; min-height: 38px; }
   #tutorial { padding: 8px 10px; gap: 8px; }
@@ -231,7 +229,6 @@ header .icon.muted::after { display: none; }
   #map-labels .island-name { display: none; }
   #start.wood-sign { padding: 6px 14px; }
   #start.wood-sign strong { font-size: 16px; }
-  .route-open.playing #viewport { bottom: 245px; }
   #route-content { max-height: 150px; }
 }
 @media(prefers-reduced-motion:reduce) {

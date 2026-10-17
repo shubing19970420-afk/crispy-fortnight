@@ -1,0 +1,87 @@
+/* B: wooden paper settings + an edge-mounted lamp and real collision map. */
+#settings { position: fixed; isolation: isolate; width: 420px; max-width: calc(100vw - 32px); padding: 26px 27px 28px; border: 0; border-radius: 0; background: transparent; box-shadow: none; overflow: auto; }
+.settings-frame { position: absolute; inset: 25px 0 6px; z-index: -1; pointer-events: none; }
+.settings-frame .wood-prop { filter: drop-shadow(6px 12px 10px #24443638); }
+#settings .settings-head { margin-bottom: 0; position: relative; min-height: 61px; }
+.settings-sign { position: relative; isolation: isolate; padding: 9px 30px 19px; margin-left: 8px; transform: rotate(-3deg); }
+#settings .settings-sign h2 { margin: 0; font-size: 32px; line-height: 1.2; color: #fff0be; text-shadow: 1px 2px #a57248; }
+#settings .settings-head > .icon { width: 46px; height: 46px; border: 2px solid #fff7d9; border-radius: 18px; background: #fff0be; box-shadow: inset 2px 3px #fffbe3, inset -2px -3px #e8d7a4, 0 5px #b29b6e, 2px 8px 4px #355c4d20; margin-top: -10px; }
+.settings-paper { background: #fff0be; border: 3px solid #fae1a7; padding: 8px 20px 12px; border-radius: 4px 7px 5px 3px; box-shadow: inset 1px 2px #fff9dc, 1px 4px #b78b58; }
+#settings .setting-row { padding: 16px 0; border: 0; border-bottom: 1px solid #dfc993; }
+#settings .setting-row strong { font-family: var(--font-body); font-size: 25px; }
+#settings .toy-switch { width: 82px; height: 44px; min-height: 44px; border: 2px solid #f8e2ac; background: #aab397; box-shadow: inset 1px 3px #798e6b55, 0 4px #b3a273; }
+#settings .toy-switch[aria-checked=true] { background: #6da778; }
+#settings .switch-knob { width: 30px; height: 30px; top: 4px; left: 4px; background: #fff6d8; box-shadow: inset 1px 2px #fffceb, 1px 3px #526d5c55; }
+#settings .toy-switch[aria-checked=true] .switch-knob { transform: translateX(38px); }
+#settings .toy-switch b { font-size: 18px; top: 11px; right: 9px; }
+#settings .toy-switch[aria-checked=true] b { left: 9px; }
+#instructions-toggle { margin-top: 12px; width: 100%; padding: 7px 0; background: none; box-shadow: none; color: #355c4d; font-size: 18px; text-align: left; border: 0; border-radius: 0; }
+#instructions-toggle span { float: right; }
+#instructions { font-family: var(--font-body); font-size: 17px; line-height: 1.7; padding-top: 8px; }
+#settings #settings-done { margin-top: 18px; min-height: 46px; font-size: 20px; border-radius: 9px 12px 10px 11px; border-color: #f4bd8b; box-shadow: inset 1px 3px #ffd2a5, 0 5px #a96847; }
+/* Fixed HUD prop: does not add a collider or move/refit the camera. */
+#route-dock { position: fixed; right: 26px; bottom: 125px; width: 72px; height: 88px; z-index: 4; }
+#route-drawer { width: 72px; height: 88px; min-height: 88px; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; filter: drop-shadow(1px 3px 3px #355c4d22); transform: none; }
+.bulb-prop { display: block; width: 100%; height: 100%; overflow: visible; }
+#route-drawer span { display: none; }
+#route-drawer:hover { transform: translateY(-4px) rotate(-4deg); }
+#route-drawer:active { transform: translateY(4px) scale(.93); box-shadow: none; }
+#route-drawer[aria-expanded=true] { filter: drop-shadow(0 0 9px #ffdc7688); }
+.bulb-rays { opacity: .45; }
+#route-drawer[aria-expanded=true] .bulb-rays, #route-drawer.has-offer .bulb-rays { opacity: 1; }
+#route-drawer.has-offer::after { display: none; }
+#route-content { isolation: isolate; position: absolute; bottom: 100px; right: 0; width: 320px; max-width: calc(100vw - 40px); max-height: none; padding: 13px 19px 23px; border: 0; border-radius: 0; background: none; box-shadow: none; overflow: visible; transform-origin: bottom right; animation: board-rise .35s var(--toy-bounce) both; cursor: pointer; }
+#route-content .wood-prop { filter: drop-shadow(3px 8px 5px #355c4d33); }
+.route-posts { position: absolute; top: 35%; bottom: -22px; left: 20%; width: 12px; z-index: -2; background: #b17d51; border-left: 3px solid #e2b784; box-shadow: 3px 2px #90633e, 3px 8px 4px #355c4d26; }
+.route-posts::after { content: ''; position: absolute; top: 0; left: 180px; height: 100%; width: 10px; background: #b17d51; border-left: 3px solid #e2b784; box-shadow: 3px 2px #90633e; }
+#route-content h3 { margin: 0 25px 5px 2px; font-size: 22px; line-height: 1.35; color: #fff0be; text-shadow: 1px 2px #a57248; }
+#route-close { position: absolute; top: 13px; right: 15px; width: 28px; min-height: 28px; padding: 5px; border-radius: 50%; background: #fff0be; color: #355c4d; box-shadow: 0 3px #b28756; }
+#route-close svg { display: block; width: 18px; height: 18px; }
+#route-map { background: #fff0be; border: 3px solid #f5d5a1; border-radius: 4px 7px 3px 5px; box-shadow: 0 3px #ab7b4c; cursor: pointer; }
+#route-map svg { display: block; width: 100%; height: 150px; pointer-events: none; }
+#route-help { margin: 7px 0 0; padding: 0; font-size: 16px; line-height: 1.3; color: #355c4d; }
+#route-toggle { width: auto; min-height: 26px; margin: 5px 0 0; padding: 3px 8px; font-size: 14px; border-radius: 5px; background: #fff0be; border: 0; box-shadow: 0 2px #b28756; }
+#route-toggle[aria-pressed=true] { display: none; }
+#offer-route { display: none; }
+
+@keyframes board-rise { from { opacity: 0; transform: translateY(26px) rotate(3deg) scale(.92); } to { opacity: 1; transform: none; } }
+@media(max-width:650px) {
+  #settings { padding: 22px 24px 26px; }
+  .settings-paper { padding: 5px 16px 10px; }
+  #settings .setting-row strong { font-size: 23px; }
+  #route-dock { right: 18px; bottom: 128px; width: 64px; height: 80px; }
+  #route-drawer { width: 64px; height: 80px; min-height: 80px; }
+  body.route-open #route-dock { bottom: 20px; }
+  #route-content { width: 330px; bottom: 92px; padding: 11px 17px 20px; }
+  #route-map svg { height: 140px; }
+  #route-content h3 { font-size: 21px; }
+  body.route-open .feedback, body.route-open #game .controls > #retry { visibility: hidden; }
+  .route-posts::after { left: 160px; }
+}
+@media(max-height:700px) and (max-width:650px) {
+  #route-content { bottom: 82px; padding: 9px 16px 17px; }
+  #route-map svg { height: 96px; }
+  #route-content h3 { font-size: 19px; margin-bottom: 3px; }
+  #route-help { font-size: 14px; margin-top: 5px; }
+}
+@media(max-height:530px) and (min-width:651px) {
+  #route-dock { right: 18px; bottom: 110px; width: 58px; height: 72px; }
+  #route-drawer { width: 58px; height: 72px; min-height: 72px; }
+  #route-content { width: 240px; bottom: 20px; right: 76px; padding: 10px 15px 18px; }
+  #route-map svg { height: 90px; }
+  #route-content h3 { font-size: 19px; }
+  #route-help { font-size: 14px; }
+}
+@media(prefers-reduced-motion:reduce) { #route-content { animation: none; } }
+/* Switch position/colour communicate state; avoid lettering under the thumb. */
+#settings .toy-switch b { display: none; }
+@media(max-height:530px) and (min-width:651px) {
+  #settings { padding: 15px 25px 20px; max-height: calc(100dvh - 24px); }
+  #settings .settings-head { min-height: 49px; }
+  .settings-sign { padding: 6px 26px 14px; }
+  #settings .settings-sign h2 { font-size: 26px; }
+  #settings .setting-row { padding: 8px 0; }
+  #settings .setting-row strong { font-size: 22px; }
+  #instructions-toggle { margin-top: 7px; padding: 5px 0; }
+  #settings #settings-done { margin-top: 10px; padding: 6px; min-height: 36px; font-size: 18px; }
+}

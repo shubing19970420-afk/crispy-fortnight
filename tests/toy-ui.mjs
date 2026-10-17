@@ -18,7 +18,7 @@ try {
  await page.keyboard.press('Shift+Tab');assert.ok(await page.evaluate(()=>document.querySelector('#settings').contains(document.activeElement)));
  await page.screenshot({path:'docs/screenshots/toy-settings.png'});
  await page.locator('#settings-sound').click();assert.equal(await page.locator('#sound').getAttribute('aria-pressed'),'false');
- await page.locator('#settings-assist').click();assert.equal(await page.locator('#settings-assist').getAttribute('aria-checked'),'true');
+ await page.locator('#settings-music').click();assert.equal(await page.locator('#settings-music').getAttribute('aria-checked'),'true');
  await page.keyboard.press('Escape');assert.equal(await page.locator('#settings').evaluate(e=>e.open),false);
  await page.locator('[data-level="2"]').click();await page.locator('#game').waitFor({state:'visible'});
  await page.waitForFunction(()=>!window.golfDebug.menu());
@@ -38,12 +38,11 @@ try {
    const p=await page.evaluate(({x,y})=>window.golfDebug.project(x,y),{x,y});
    assert.ok(!(p.x>=r.x&&p.x<=r.x+r.width&&p.y>=r.y&&p.y<=r.y+r.height),'drawer must not cover ball or hole');
   }
-  const canvas=await page.locator('canvas').boundingBox();
-  assert.ok(r.y>=canvas.y+canvas.height-1,'expanded board stays outside the playing viewport');
+  // Stage B uses a fixed edge prop; stage-b.mjs separately asserts no camera refit.
  }
  await clearPaths();await page.screenshot({path:'docs/screenshots/toy-route.png'});
- await page.locator('#route-toggle').click();assert.equal(await page.evaluate(()=>window.golfDebug.hint()),null);
- await page.locator('#route-toggle').click();await page.waitForFunction(()=>window.golfDebug.hint(),{},{timeout:40000});
+ await page.locator('#route-drawer').click();assert.equal(await page.evaluate(()=>window.golfDebug.hint()),null);
+ await page.locator('#route-drawer').click();await page.waitForFunction(()=>window.golfDebug.hint(),{},{timeout:40000});
  await page.setViewportSize({width:390,height:844});await page.waitForTimeout(500);await clearPaths();
  await page.screenshot({path:'docs/screenshots/toy-route-mobile.png'});
  await page.locator('#route-drawer').click();await page.waitForTimeout(300);

@@ -1,0 +1,16 @@
+import { WIDTH, HEIGHT, type Level } from './levels';
+import { actorAt } from './physics';
+import type { Route } from './route-hints';
+// Read-only view of actual collision geometry and verified simulator points.
+export function routeMap(level: Level, route: Route | null, time: number) {
+  const actor = actorAt(level, time);
+  const path = route ? `<polyline data-verified-route points="${route.points.map(p=>`${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' ')}" fill="none" stroke="#e6aa32" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="16 17"/>` : '';
+  return `<svg viewBox="-14 -14 ${WIDTH+28} ${HEIGHT+28}" role="img" aria-label="办公室真实碰撞地图${route?'及已验证参考路线':'，等待验证路线'}"><rect width="${WIDTH}" height="${HEIGHT}" rx="22" fill="#fff0be" stroke="#cfb981" stroke-width="7"/>
+  ${(level.desks||[]).map(d=>`<rect x="${d.x}" y="${d.y}" width="${d.w}" height="${d.h}" rx="8" fill="#d5a16e" opacity=".17"/>`).join('')}
+  ${level.obstacles.map(o=>`<rect data-collider="${o.id}" x="${o.x}" y="${o.y}" width="${o.w}" height="${o.h}" rx="2" fill="${o.model==='desk-leg'?'#a47950':'#6b9483'}" stroke="#355c4d" stroke-width="3"/>`).join('')}
+  ${(level.circles||[]).map(c=>`<circle data-collider="${c.id}" cx="${c.x}" cy="${c.y}" r="${c.r}" fill="#83ad80" stroke="#355c4d" stroke-width="3"/>`).join('')}
+  ${level.walker?`<path d="M${level.walker.x} ${level.walker.y-level.walker.amplitude}V${level.walker.y+level.walker.amplitude}" stroke="#db9770" stroke-width="5" stroke-dasharray="8 12"/>`:''}${path}
+  ${actor?`<circle id="route-person" cx="${actor.x}" cy="${actor.y}" r="${level.walker!.r}" fill="#ef9166" stroke="#a8654b" stroke-width="4"/>`:''}
+  <circle cx="${level.start.x}" cy="${level.start.y}" r="14" fill="#fffef2" stroke="#a9ae91" stroke-width="4"/>
+  <circle cx="${level.hole.x}" cy="${level.hole.y}" r="17" fill="#355c4d"/><path d="M${level.hole.x} ${level.hole.y}v-65l44 14-44 16" fill="#ef9166" stroke="#fff9df" stroke-width="5"/></svg>`;
+}
