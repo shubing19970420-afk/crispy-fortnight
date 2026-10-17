@@ -13,7 +13,7 @@ try {
  assert.ok(fonts.loaded.includes('Maoken Assorted Sans'));assert.ok(fonts.loaded.includes('HuangYou'));assert.ok(fonts.title.includes('Maoken'));assert.ok(fonts.body.includes('HuangYou'));assert.ok(Math.abs(fonts.a-fonts.b)<2,'Chinese fallback widths match');
  for(const [width,height] of [[1440,960],[390,844],[320,640],[844,390]]){
   await page.setViewportSize({width,height});await page.waitForTimeout(350);
-  assert.equal(await page.locator('.map-label').count(),3);
+  assert.equal(await page.locator('.map-label').count(),5);
   for(const title of await page.locator('.map-label strong').all())assert.ok(await title.evaluate(e=>e.scrollWidth<=e.clientWidth+1),'island title fits');
   await page.locator('#settings-open').click();
   assert.ok(await page.locator('#settings').evaluate(e=>e.scrollWidth<=e.clientWidth+1),'settings text fits');

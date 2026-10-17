@@ -15,6 +15,7 @@ try {
   await page.goto(process.env.GOLF_URL || "http://127.0.0.1:5173");
   await page.waitForFunction(() => window.golfDebug?.menu());
   await fs.mkdir("test-results", { recursive: true });
+  await page.evaluate(()=>localStorage.setItem("golf-progress-v4","[0,1,2,3]"));await page.reload();await page.waitForFunction(()=>window.golfDebug?.menu());
   assert.equal(
     await page.locator(".level-button,.level-select,.card").count(),
     0,
@@ -63,13 +64,13 @@ try {
     await page.locator("#game").waitFor({ state: "visible" });
     assert.equal(
       await page.locator("#title").textContent(),
-      ["就在眼前", "请走弯路", "办公室高尔夫"][i],
+      ["就在眼前", "请走弯路", "办公室高尔夫", "风车捣蛋鬼", "不可能的一杆"][i],
     );
     await page.locator("#home").click();
     await idle();
     assert.equal(await page.locator(".map-label.active").count(), 0);
   }
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 5; i++) {
     const p = await point(i),
       before = await page.evaluate(() => window.golfDebug.menu());
     await page.mouse.move(p.x, p.y);
@@ -105,15 +106,16 @@ try {
   assert.equal(await page.locator("#title").textContent(), "请走弯路");
   await page.locator("#home").click();
   console.log("PASS keyboard island selection");
-  await page.locator("#start").click();
+  assert.equal(await page.locator("#start").count(),0);
+  await page.locator('[data-level="0"]').click();
   await page.locator("#game").waitFor({ state: "visible" });
   assert.equal(await page.locator("#title").textContent(), "就在眼前");
   await page.locator("#home").click();
-  console.log("PASS wooden start sign");
+  console.log("PASS direct wooden plaque entry without a start button");
   await page.setViewportSize({ width: 390, height: 844 });
   await idle();
-  for (let i = 0; i < 3; i++) await enter(i, true);
-  console.log("PASS mobile touch selection of all three islands");
+  for (let i = 0; i < 5; i++) await enter(i, true);
+  console.log("PASS mobile touch selection of all five islands");
   await page.mouse.move(0, 0);
   await idle();
   await page.screenshot({ path: "test-results/map-mobile.png" });
@@ -123,7 +125,7 @@ try {
     ),
   );
   const before = await page.evaluate(() => window.golfDebug.renderer());
-  for (let i = 0; i < 4; i++) await enter(i % 3, true);
+  for (let i = 0; i < 4; i++) await enter(i % 5, true);
   await idle();
   const after = await page.evaluate(() => window.golfDebug.renderer());
   assert.ok(after.geometries <= before.geometries + 3);

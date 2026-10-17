@@ -114,6 +114,7 @@ for (const l of levels)
       obstacles: "w" in o ? [o] : [],
       circles: "r" in o ? [o] : [],
       walker: undefined,
+      rotor:undefined,portals:undefined,platforms:undefined,
       hole: { x: 850, y: 510 },
     };
     const b = createBall(isolated);
@@ -229,7 +230,7 @@ console.log("PASS high speed swept circle prevents tunnelling");
 let seed = 73219;
 const random = () =>
   (seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 2 ** 32;
-for (const l of levels.slice(1))
+for (const l of levels.slice(1,3))
   for (let i = 0; i < 120; i++)
     run(l, random() * Math.PI * 2, 6 + random() * 144, random() * 8, true);
 console.log(

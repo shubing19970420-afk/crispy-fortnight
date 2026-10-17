@@ -7,7 +7,7 @@ assert.equal(victory(1.234,1.23).kind,'success');
 assert.equal(victory(1.22,1.23).kind,'record');
 assert.equal(victory(1.25,1.23).best,1.23);
 for(const raw of ['null','[]','[1,2,3]','broken','{"0":-2,"1":"fast","2":null}']) assert.deepEqual(readScores(raw),{});
-assert.deepEqual(readScores('{"0":1.5,"2":2.5,"3":99}'),{'0':1.5,'2':2.5});
+assert.deepEqual(readScores('{"0":1.5,"2":2.5,"3":99}'),{'0':1.5,'2':2.5,'3':99});
 let successes=0,waits=0;
 for(let time=0;time<8;time+=.25) {
   const route=findOfficeRoute(levels[2],time);

@@ -6,7 +6,7 @@ export type Rect = {
   y: number;
   w: number;
   h: number;
-  model: "fence" | "cabinet" | "desk-leg";
+  model: "fence" | "cabinet" | "desk-leg" | "portal-post";
   surface: Surface;
   label?: string;
 };
@@ -26,7 +26,13 @@ export type Walker = {
   period: number;
   r: number;
 };
+export type Platform = {x:number;y:number;w:number;h:number};
+export type Rotor = {x:number;y:number;length:number;width:number;arms:number;omega:number;phase:number};
+export type Portal = {x:number;y:number;angle:number;r:number};
 export type Level = {
+  rotor?: Rotor;
+  portals?: [Portal,Portal];
+  platforms?: Platform[];
   name: string;
   subtitle: string;
   hint: string;
@@ -75,6 +81,13 @@ const legs: Rect[] = desks.flatMap((d, i) =>
     })),
   ),
 );
+const portalPair:[Portal,Portal]=[{x:300,y:280,angle:0,r:23},{x:650,y:150,angle:Math.PI/2,r:23}];
+// The tangible gate posts share the model's 9-unit footprint. The overhead
+// crossbar clears the ball, while the luminous ring itself is the trigger.
+const portalPosts:Rect[]=portalPair.flatMap((p,i)=>[-1,1].map(side=>{
+  const offset=(p.r+10)*side;
+  return {id:`portal-${i}-post-${side}`,x:p.x-Math.sin(p.angle)*offset-4.5,y:p.y+Math.cos(p.angle)*offset-4.5,w:9,h:9,model:"portal-post",surface:"rubber"};
+}));
 export const levels: Level[] = [
   {
     name: "就在眼前",
@@ -195,5 +208,18 @@ export const levels: Level[] = [
       },
     ],
     walker: { x: 575, y: 230, amplitude: 160, period: 8, r: 20 },
+  },
+  {
+    name: "风车捣蛋鬼", subtitle: "04 / 借风车一臂之力", hint: "观察顺时针叶片，让它把球推向旗杆。",
+    start: {x:180,y:430}, hole:{x:260,y:235},
+    rotor:{x:430,y:280,length:135,width:20,arms:4,omega:.5,phase:0},
+    obstacles:[{id:"windmill-bank",x:65,y:300,w:210,h:22,model:"fence",surface:"wood"}],
+    circles:[{id:"windmill-hub",x:430,y:280,r:21,model:"stump",surface:"wood"}],
+  },
+  {
+    name: "不可能的一杆", subtitle: "05 / 换个方向，就有可能", hint: "蓝门入，橙门出；出口箭头决定新的方向。",
+    start:{x:110,y:280},hole:{x:650,y:430},obstacles:portalPosts,circles:[],
+    platforms:[{x:45,y:120,w:335,h:350},{x:540,y:65,w:315,h:440}],
+    portals:portalPair,
   },
 ];

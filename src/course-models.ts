@@ -187,7 +187,9 @@ export class CourseModels {
     const x = o.x + o.w / 2 - 450,
       z = o.y + o.h / 2 - 280;
     let body: T.Mesh;
-    if (o.model === "fence") {
+    if(o.model==="portal-post") {
+      body=this.box(o.w,40,o.h,o.id.startsWith("portal-0")?0x66c5ce:0xef9166,x,20,z,this.host.root,1);
+    } else if (o.model === "fence") {
       body = this.box(o.w, 30, o.h, 0xc38d59, x, 15, z);
       for (let y = o.y + 12; y <= o.y + o.h - 9; y += 55) {
         this.box(o.w, 51, 18, 0xa6744a, x, 25.5, y - 280);

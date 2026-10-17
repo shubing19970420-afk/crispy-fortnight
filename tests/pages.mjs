@@ -36,6 +36,7 @@ try{
   if(process.env.PAGES_URL&&attempt<9){failures.length=0;await page.waitForTimeout(3000);}
  }
  assert.ok(loaded,'Pages must serve index.html successfully');
+ await page.evaluate(()=>localStorage.setItem("golf-progress-v4","[0,1,2,3]"));await page.reload({waitUntil:"domcontentloaded"});
  await page.locator('[data-level="0"]').waitFor({state:'visible'});
  await page.evaluate(async()=>{
   await Promise.all([document.fonts.load('24px "Maoken Assorted Sans"','一杆归洞办公室高尔夫'),document.fonts.load('24px HuangYou','设置0123456789'),document.fonts.load('24px Smiley','0123456789')]);await document.fonts.ready;
@@ -46,8 +47,8 @@ try{
  assert.equal(await page.locator('#webgl-error').isVisible(),false);
  assert.equal(await page.locator('canvas').count(),1);
  await page.screenshot({path:`${output}/menu.png`});
- const names=['就在眼前','请走弯路','办公室高尔夫'];
- for(let i=0;i<3;i++){
+ const names=['就在眼前','请走弯路','办公室高尔夫','风车捣蛋鬼','不可能的一杆'];
+ for(let i=0;i<names.length;i++){
   await page.locator(`[data-level="${i}"]`).click();await page.locator('#game').waitFor({state:'visible'});await page.waitForTimeout(250);
   assert.equal(await page.locator('#title').textContent(),names[i]);
   if(await page.locator('#tutorial-close').isVisible())await page.locator('#tutorial-close').click();
@@ -55,7 +56,7 @@ try{
   const canvas=await page.locator('canvas').boundingBox();assert.ok(canvas.width>200&&canvas.height>200);
   await page.screenshot({path:`${output}/level-${i+1}.png`});
   await page.locator('#retry').click();assert.equal(await page.locator('#title').textContent(),names[i]);
-  if(i===2){await page.locator('#route-drawer').click();await page.waitForFunction(()=>!!document.querySelector('[data-verified-route]'),{},{timeout:40000});await page.locator('#route-close').click();}
+  if(i>=2){await page.locator('#route-drawer').click();await page.waitForFunction(()=>!!document.querySelector('[data-verified-route]'),{},{timeout:40000});await page.locator('#route-close').click();}
   await page.locator('#home').click();await page.locator('#menu').waitFor({state:'visible'});
  }
  await page.setViewportSize({width:390,height:844});await page.waitForTimeout(200);await page.screenshot({path:`${output}/mobile.png`});
@@ -63,6 +64,6 @@ try{
  assert.ok(resources.filter(r=>r.url.includes('.woff2')&&r.status===200).length>=3,'font requests succeeded');
  assert.deepEqual(errors,[]);assert.deepEqual(failures,[]);
  await writeFile(`${output}/report.json`,JSON.stringify({url,fonts,levels:names,resources,errors,failures},null,2));
- console.log(`PASS ${process.env.PAGES_URL?'published':'production subdirectory'} game: CSS/JS, original logo, 3 local fonts, WebGL, all 3 levels/retry/home, real route worker, mobile; no failed resources`);
+ console.log(`PASS ${process.env.PAGES_URL?'published':'production subdirectory'} game: CSS/JS, original logo, 3 local fonts, WebGL, all 5 levels/retry/home, real route worker, mobile; no failed resources`);
 }catch(error){await page.screenshot({path:`${output}/failure.png`});await writeFile(`${output}/report.json`,JSON.stringify({url,resources,errors,failures,error:String(error)},null,2));throw error;}
 finally{await browser.close();await new Promise(r=>server?server.close(r):r());}

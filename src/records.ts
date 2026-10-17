@@ -6,7 +6,7 @@ export function victory(seconds:number, previous:unknown):Victory {
 }
 export function readScores(raw:string|null):Record<string,number> {
   try { const v=JSON.parse(raw||'{}'); if(!v || typeof v!=='object' || Array.isArray(v)) return {}; const scores:Record<string,number>={};
-    for(const key of ['0','1','2']) if(typeof v?.[key]==='number' && Number.isFinite(v[key]) && v[key]>0) scores[key]=v[key];
+    for(const key of ['0','1','2','3','4']) if(typeof v?.[key]==='number' && Number.isFinite(v[key]) && v[key]>0) scores[key]=v[key];
     return scores;
   } catch {return {};}
 }

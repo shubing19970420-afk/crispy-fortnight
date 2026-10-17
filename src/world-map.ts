@@ -20,6 +20,8 @@ export const destinations = [
     feature: "家具之间 · 注意同事",
     color: "#ee9464",
   },
+  {title:"风车捣蛋鬼",theme:"风车岛",feature:"借叶片推一把",color:"#e8c886"},
+  {title:"不可能的一杆",theme:"传送岛",feature:"出口改变方向",color:"#66c5ce"},
 ];
 type Island = {
   group: T.Group;
@@ -29,6 +31,7 @@ type Island = {
   ball?: T.Mesh;
   chair?: T.Group;
   person?: T.Group;
+  rotor?:T.Group;
   lift: number;
   liftVelocity: number;
 };
@@ -45,7 +48,7 @@ export class WorldMap {
   constructor(private host: GolfScene) {
     host.scene.add(this.root);
     this.root.add(this.paths);
-    for (let i = 0; i < 3; i++) this.buildIsland(i);
+    for (let i = 0; i < destinations.length; i++) this.buildIsland(i);
     this.layout();
   }
   private box(
@@ -167,7 +170,7 @@ export class WorldMap {
     g.userData.level = i;
     this.root.add(g);
     this.slab(338, 265, 37, i === 2 ? 0x916d56 : 0xa98161, -12, g);
-    this.slab(350, 270, 13, [0x90c95f, 0x63aa77, 0xe2bb7e][i], 0, g);
+    this.slab(350, 270, 13, [0x90c95f, 0x63aa77, 0xe2bb7e,0x90c95f,0x80b9a0][i], 0, g);
     // Generous raycast disk, separate from decorative meshes. It never receives a game collider.
     const hit = new T.Mesh(
       new T.CylinderGeometry(184, 184, 140, 12),
@@ -249,7 +252,7 @@ export class WorldMap {
         this.mesh(new T.DodecahedronGeometry(r, 0), 0x9eaaa0, x, 10, z, g);
       this.box(14, 30, 67, 0xdba36a, 15, 15, -8, g, 2);
       island.flag = this.hole(113, -60, g);
-    } else {
+    } else if(i===2) {
       // Toy office: the miniature is a menu illustration, not new gameplay geometry.
       this.box(270, 9, 200, 0xf2d798, 0, 5, 0, g, 4);
       const desk = new T.Group();
@@ -285,6 +288,18 @@ export class WorldMap {
       this.box(34, 2, 27, 0xffe36e, -100, 12, 50, g);
       island.flag = this.hole(100, 75, g, 10);
     }
+    if(i===3){
+      const rotor=island.rotor=new T.Group();rotor.position.set(-20,12,0);g.add(rotor);
+      for(let j=0;j<4;j++){const arm=new T.Group();arm.rotation.y=j*Math.PI/2;rotor.add(arm);this.box(110,13,18,0xe8c886,65,0,0,arm,2);this.box(18,14,19,0xef9166,110,0,0,arm,1);}
+      this.mesh(new T.CylinderGeometry(16,20,28,8),0xffe9ae,-20,14,0,g);
+      island.flag=this.hole(115,-55,g);island.trees.push(this.tree(-120,-70,.7,g));
+    }
+    if(i===4){
+      for(const [x,z,c] of [[-80,28,0x66c5ce],[68,-20,0xef9166]]){
+        const ring=this.mesh(new T.TorusGeometry(30,6,6,20),c,x,8,z,g);ring.rotation.x=Math.PI/2;
+        this.box(8,46,8,c,x,23,z-38,g,2);this.box(8,46,8,c,x,23,z+38,g,2);this.box(8,8,82,0xffedb8,x,49,z,g,2);
+      }island.flag=this.hole(115,65,g);
+    }
     // A pennant-shaped 3D number marker, not a flat web card.
     const post = this.box(5, 46, 5, 0x8c654b, -128, 22, 47, g);
     post.castShadow = false;
@@ -311,14 +326,13 @@ export class WorldMap {
     const portrait = this.host.canvas.parentElement!.clientWidth < 650;
     const positions = portrait
       ? [
-          [-75, 0, 450],
-          [100, 28, 0],
-          [-30, 5, -480],
+          [-185,0,410], [185,28,180], [-185,5,-110], [185,0,-350], [0,5,-730],
         ]
       : [
           [-385, 0, 150],
           [0, 45, -185],
           [400, -4, 60],
+          [-220,0,565], [230,5,550],
         ];
     this.islands.forEach((island, i) => {
       island.group.position.fromArray(positions[i]);
@@ -326,7 +340,7 @@ export class WorldMap {
     });
     this.disposeObjects(this.paths);
     this.paths.clear();
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < destinations.length-1; i++) {
       const a = this.islands[i].group.position,
         b = this.islands[i + 1].group.position;
       const curve = new T.CatmullRomCurve3([
@@ -439,7 +453,7 @@ export class WorldMap {
     };
   }
   update(t: number, dt: number): number | null {
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < destinations.length; i++) {
       const s = this.islands[i],
         active = i === this.hovered;
       // Only menu feedback: a small damped spring, independent of ball physics.
@@ -459,6 +473,7 @@ export class WorldMap {
       for (let j = 0; j < s.trees.length; j++)
         s.trees[j].rotation.z =
           Math.sin(t * (active ? 2.7 : 1) + j) * (active ? 0.065 : 0.012);
+      if(s.rotor)s.rotor.rotation.y=-t*.85;
       if (s.flag)
         s.flag.rotation.y =
           Math.sin(t * (active ? 4 : 2)) * (active ? 0.3 : 0.1);

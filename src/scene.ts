@@ -1,3 +1,4 @@
+import {SpecialModels} from "./special-models";
 import * as T from "three";
 import { CourseModels } from "./course-models";
 import { WorldMap } from "./world-map";
@@ -22,6 +23,7 @@ export class GolfScene {
   particles = new T.Group();
   colliders: { rect: Rect; mesh: T.Object3D }[] = [];
   private course?: CourseModels;
+  private special?:SpecialModels;
   private ray = new T.Raycaster();
   private plane = new T.Plane(new T.Vector3(0, 1, 0), 0);
   private level: Level = levels[0];
@@ -201,6 +203,7 @@ export class GolfScene {
     this.root.clear();
     this.colliders = [];
     this.course = undefined;
+    this.special=undefined;
     this.capture = undefined;
     this.burstTime = -1;
     this.lastBall = undefined;
@@ -222,6 +225,14 @@ export class GolfScene {
     this.clearLevel();
     const l = (this.level = levels[index]),
       office = !!l.office;
+    if(l.platforms) {
+      for(const p of l.platforms){
+        this.box(p.w,54,p.h,0xb78c64,p.x+p.w/2-450,-37,p.y+p.h/2-280,8);
+        const shape=new T.Shape();shape.moveTo(p.x-450,280-p.y);shape.lineTo(p.x+p.w-450,280-p.y);shape.lineTo(p.x+p.w-450,280-p.y-p.h);shape.lineTo(p.x-450,280-p.y-p.h);shape.closePath();
+        if(l.hole.x>p.x&&l.hole.x<p.x+p.w){const hole=new T.Path();hole.absarc(l.hole.x-450,280-l.hole.y,17,0,Math.PI*2,true);shape.holes.push(hole);}
+        const geo=new T.ExtrudeGeometry(shape,{depth:10,bevelEnabled:false,curveSegments:24});geo.rotateX(-Math.PI/2);this.mesh(geo,green,0,-10,0).castShadow=false;
+      }
+    } else {
     this.box(900, 54, 560, office ? 0xb98760 : 0xb78c64, 0, -37, 0, 12);
     this.box(860, 18, 520, office ? 0x936546 : 0x8a7459, 0, -71, 0, 8);
     // Extruded surface contains a genuine hole; all positions use physics units.
@@ -270,6 +281,7 @@ export class GolfScene {
           }
         }
       }
+    }
     // Do not let decorative stripes cover the actual hole.
     const well = this.mesh(
       new T.CylinderGeometry(16.8, 16.8, 10, 32, 1, true),
@@ -294,12 +306,12 @@ export class GolfScene {
     rim.position.copy(world(l.hole.x, l.hole.y, 0.3));
     this.root.add(rim);
     // Inner edge of each wall is exactly x/y=28 or width/height-28.
-    for (const a of [
+    for (const a of (l.platforms ? [] : [
       { x: 14, y: 280, w: 28, h: 560 },
       { x: 886, y: 280, w: 28, h: 560 },
       { x: 450, y: 14, w: 844, h: 28 },
       { x: 450, y: 546, w: 844, h: 28 },
-    ]) {
+    ])) {
       this.box(
         a.w,
         18,
@@ -312,8 +324,9 @@ export class GolfScene {
       );
     }
     this.course = new CourseModels(this, l);
+    this.special = new SpecialModels(this,l);
     this.colliders = this.course.rects;
-    if (!office && !l.forest) this.garden();
+    if (!office && !l.forest && !l.platforms) this.garden();
     this.flag = new T.Group();
     this.flag.position.copy(world(l.hole.x + 19, l.hole.y, 0));
     this.root.add(this.flag);
@@ -493,6 +506,7 @@ export class GolfScene {
   }
   updateBall(b: Ball, dt: number) {
     this.course?.update(b);
+    this.special?.update(b.time);
     if (this.capture) {
       const c = this.capture;
       c.t += dt;
@@ -570,34 +584,33 @@ export class GolfScene {
   clearAim() {
     this.showAim(createBall(this.level), 0, 0);
   }
-  showRoute(points: {x:number;y:number}[] = []) {
+  showRoute(points: {x:number;y:number;breakBefore?:boolean}[] = []) {
     for(const o of this.route.children) {
       if(o instanceof T.InstancedMesh) o.dispose();
       const line=o as T.Line; line.geometry.dispose(); (line.material as T.Material).dispose();
     }
     this.route.clear();
     if(points.length<2) return;
-    const path=points.map(p=>world(p.x,p.y,3.5));
-    const distances=[0];
-    for(let i=1;i<path.length;i++) distances.push(distances[i-1]+path[i].distanceTo(path[i-1]));
-    const total=distances.at(-1)!;
-    const at=(d:number)=>{
-      let i=1;while(i<distances.length-1 && distances[i]<d) i++;
-      return path[i-1].clone().lerp(path[i],(d-distances[i-1])/(distances[i]-distances[i-1]||1));
-    };
-    const count=Math.ceil(total/22), up=new T.Vector3(0,1,0);
+    // Teleports break a trajectory; never stretch a dash across the empty gap.
+    const chunks:T.Vector3[][]=[];
+    for(const p of points){if(!chunks.length||p.breakBefore)chunks.push([]);chunks.at(-1)!.push(world(p.x,p.y,3.5));}
+    const strokes:{a:T.Vector3;b:T.Vector3}[]=[];
+    for(const path of chunks){
+      if(path.length<2)continue;
+      const distances=[0];for(let i=1;i<path.length;i++)distances.push(distances[i-1]+path[i].distanceTo(path[i-1]));
+      const total=distances.at(-1)!;
+      const at=(d:number)=>{let i=1;while(i<distances.length-1&&distances[i]<d)i++;return path[i-1].clone().lerp(path[i],(d-distances[i-1])/(distances[i]-distances[i-1]||1));};
+      for(let d=0;d<total;d+=22)strokes.push({a:at(d),b:at(Math.min(d+12,total))});
+    }
+    const up=new T.Vector3(0,1,0);
     for(const [radius,opacity,color] of [[3.8,.16,0xfff3ad],[1.6,.85,0xfff3ad]]) {
-      const dashes=new T.InstancedMesh(new T.CylinderGeometry(radius,radius,1,6),new T.MeshBasicMaterial({color,transparent:true,opacity,depthWrite:false}),count);
+      const dashes=new T.InstancedMesh(new T.CylinderGeometry(radius,radius,1,6),new T.MeshBasicMaterial({color,transparent:true,opacity,depthWrite:false}),strokes.length);
       const dummy=new T.Object3D();
-      for(let i=0;i<count;i++) {
-        const a=at(i*22),b=at(Math.min(i*22+12,total)),direction=b.clone().sub(a);
-        dummy.position.copy(a).add(b).multiplyScalar(.5);
-        dummy.quaternion.setFromUnitVectors(up,direction.clone().normalize());
-        dummy.scale.set(1,direction.length(),1); dummy.updateMatrix(); dashes.setMatrixAt(i,dummy.matrix);
-      }
+      strokes.forEach(({a,b},i)=>{const direction=b.clone().sub(a);dummy.position.copy(a).add(b).multiplyScalar(.5);dummy.quaternion.setFromUnitVectors(up,direction.clone().normalize());dummy.scale.set(1,direction.length(),1);dummy.updateMatrix();dashes.setMatrixAt(i,dummy.matrix);});
       dashes.instanceMatrix.needsUpdate=true;this.route.add(dashes);
     }
   }
+
   captureBall(b: Ball) {
     this.capture = { x: b.x, y: b.y, t: 0 };
     this.burstTime = 0;

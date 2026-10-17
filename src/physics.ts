@@ -60,6 +60,8 @@ export type Ball = {
   time: number;
   shotAt: number;
   actorHitAt: number;
+  teleports?:number;
+  portalReadyAt?:number;
 };
 export function createBall(l: Level): Ball {
   return {
@@ -181,6 +183,7 @@ const restitution: Record<Surface, number> = {
 /** Fixed simulation time starts at level entry, advances during aiming, freezes on outcome. */
 export function step(b: Ball, l: Level, dt = STEP) {
   if (b.state === "won" || b.state === "lost") return;
+  if((l.rotor||l.portals)&&dt>STEP+1e-10){for(let rest=dt;rest>1e-10;rest-=STEP)step(b,l,Math.min(rest,STEP));return;}
   if (b.state === "ready") {
     b.time += dt;
     return;
@@ -204,12 +207,12 @@ export function step(b: Ball, l: Level, dt = STEP) {
     const consider = (c: Contact | null) => {
       if (c && (!contact || c.t < contact.t)) contact = c;
     };
-    for (const [axis, plane, nx, ny] of [
+    for (const [axis, plane, nx, ny] of (l.platforms ? [] : [
       [0, 37, 1, 0],
       [0, 863, -1, 0],
       [1, 37, 0, 1],
       [1, 523, 0, -1],
-    ]) {
+    ])) {
       const pos = axis === 0 ? b.x : b.y,
         speed = axis === 0 ? dx : dy,
         n = axis === 0 ? nx : ny;
@@ -259,8 +262,46 @@ export function step(b: Ball, l: Level, dt = STEP) {
           surface: "person",
         });
     }
+    // Rotor blades use the same circle-vs-rounded-rectangle sweep as furniture,
+    // transformed into each blade's moving frame. At 240 Hz this level's blade
+    // turns at most 0.12 degrees; relative surface velocity supplies the kick.
+    if(l.rotor) {
+      const r=l.rotor, clock=b.time+elapsed;
+      for(let arm=0;arm<r.arms;arm++) {
+        const angle=r.phase+r.omega*clock+arm*2*Math.PI/r.arms;
+        const c=Math.cos(angle),s=Math.sin(angle),rx=b.x-r.x,ry=b.y-r.y;
+        const x=c*rx+s*ry,y=-s*rx+c*ry;
+        const vx=c*b.vx+s*b.vy+r.omega*y,vy=-s*b.vx+c*b.vy-r.omega*x;
+        const h=rectHit(x,y,vx*remaining,vy*remaining,{id:"blade",x:21,y:-r.width/2,w:r.length-21,h:r.width,model:"fence",surface:"wood"});
+        if(h) {
+          const turn=r.omega*remaining*h.t,ca=Math.cos(angle+turn),sa=Math.sin(angle+turn);
+          const px=x+vx*remaining*h.t,py=y+vy*remaining*h.t;
+          const wx=ca*px-sa*py,wy=sa*px+ca*py;
+          consider({...h,nx:ca*h.nx-sa*h.ny,ny:sa*h.nx+ca*h.ny,vx:-r.omega*wy,vy:r.omega*wx,id:`windmill-blade-${arm}`,surface:"wood"});
+        }
+      }
+    }
     const hit = contact as Contact | null,
       hole = holeEntry(b.x, b.y, b.x + dx, b.y + dy, l.hole.x, l.hole.y);
+    let portalEvent:{t:number;index:number}|null=null;
+    if(l.portals && b.time+elapsed>=(b.portalReadyAt||0)) {
+      l.portals.forEach((p,index)=>{
+        const t=diskEntry(b.x,b.y,b.x+dx,b.y+dy,p.x,p.y,p.r);
+        if(t!==null && (!portalEvent||t<portalEvent.t)) portalEvent={t,index};
+      });
+    }
+    const portal=portalEvent as {t:number;index:number}|null;
+    if(portal && (!hit||portal.t<hit.t) && (hole===null||portal.t<hole)) {
+      const source=l.portals![portal.index],exit=l.portals![1-portal.index];
+      const turn=exit.angle-source.angle,c=Math.cos(turn),s=Math.sin(turn),vx=b.vx;
+      b.vx=c*vx-s*b.vy;b.vy=s*vx+c*b.vy;
+      // Emerge beyond the trigger disk, in the exit's clearly marked direction.
+      b.x=exit.x+Math.cos(exit.angle)*(exit.r+R+2);
+      b.y=exit.y+Math.sin(exit.angle)*(exit.r+R+2);
+      const used=remaining*portal.t;elapsed+=used;remaining-=used;
+      b.portalReadyAt=b.time+elapsed+.15;b.teleports=(b.teleports||0)+1;
+      continue;
+    }
     if (hole !== null && (!hit || hole < hit.t)) {
       b.x += dx * hole;
       b.y += dy * hole;
@@ -299,6 +340,10 @@ export function step(b: Ball, l: Level, dt = STEP) {
     b.vx = b.vy = 0;
   }
   b.time += dt;
+  // Only the split-island level has unrailed cliffs. Old courses keep their walls.
+  if(l.platforms && !l.platforms.some(p=>b.x>=p.x+R&&b.x<=p.x+p.w-R&&b.y>=p.y+R&&b.y<=p.y+p.h-R)) {
+    b.state="lost";b.vx=b.vy=0;return;
+  }
   const speed = Math.hypot(b.vx, b.vy),
     next = Math.max(0, speed - DRAG * dt);
   if (next < 2) {
