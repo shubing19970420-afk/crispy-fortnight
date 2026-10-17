@@ -9,7 +9,7 @@ try {
  await page.goto(url);await page.waitForFunction(()=>window.golfDebug?.menu());
  await page.evaluate(async()=>{await Promise.all([document.fonts.load('24px "Maoken Assorted Sans"',"一杆归洞0123456789"),document.fonts.load("24px HuangYou","一杆归洞")]);await document.fonts.ready;});
  assert.ok(await page.evaluate(()=>document.fonts.check('24px "Maoken Assorted Sans"')&&document.fonts.check('24px HuangYou')));
- await page.locator('#menu-assist').click();assert.equal(await page.locator('#menu-assist').getAttribute('aria-pressed'),'true');await page.locator('#menu-assist').click();assert.equal(await page.locator('#menu-assist').getAttribute('aria-pressed'),'false');
+ await page.locator('#settings-open').click();await page.locator('#settings-assist').click();assert.equal(await page.locator('#settings-assist').getAttribute('aria-checked'),'true');await page.locator('#settings-assist').click();assert.equal(await page.locator('#settings-assist').getAttribute('aria-checked'),'false');await page.locator('#settings-close').click();
  await fs.mkdir('test-results',{recursive:true});
  await page.screenshot({path:'test-results/menu-fonts.png'});
  async function enter(i){await page.locator(`[data-level="${i}"]`).click();await page.locator('#game').waitFor({state:'visible'});await page.waitForFunction(()=>!window.golfDebug.menu());}

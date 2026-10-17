@@ -166,3 +166,18 @@ npm run preview
 - 统一字体注册与角色变量：`src/fonts.css`；文字层级和窄屏适配：`src/typography.css`。标题预加载、本地度量适配回退，关闭合成粗体；完整来源、版本、散列见 `public/fonts/README.md`、`font-manifest.json` 和 `SHA256SUMS`。
 - 精简首页口号、重复操作说明和设置副标题，名称统一为「一杆归洞」。未提前制作后续横幅、灯泡木牌或新关卡。
 - 浏览器排版检查：启动开发服务器后运行 `node tests/typography.mjs`；现有交互与截图检查运行 `npm run test:ui`。实际截图在 `docs/screenshots/`，并非生成图。
+
+## UI 组件阶段 A：微缩道具
+
+参照仓库根目录 `ui-style-reference.png`，本阶段只更新选关木牌、难度章、首页主按钮、顶部 HUD、操作按钮及力度计。标题与正文继续沿用已确认字体（猫啃什锦黑／合法黄油体），未更换字体文件。
+
+- `src/ui-props.ts`：原创 SVG 叠层木牌（切角、拼板缝、克制木纹、倒角、侧面、钉帽）及分面金色玩具星章；不是参考图裁切贴图。SVG 可随按钮缩放，无外部素材和新增依赖。
+- `src/stage-a.css`：吊带／编号牌、陶瓷按钮高光与厚底座、接触阴影、按下压缩与回弹、分段力度计及球形指针。尊重减少动态效果设置。
+- 难度固定为 1／2／3 颗金星，不绘制灰色空星；独立勾号表示已通关。进度和最佳成绩仍用原有存储。
+- 首页底部路线辅助小字入口收起，已有设置里的路线辅助开关仍可使用。游戏内使用顶部首页按钮返回选关，底部移除重复返回；移动／待击球显示重试，结算时隐藏底部操作，使用既有结算按钮。
+- 力度计只读取现有拖拽比例，不改力度、发射、轨迹与物理。场景模型、岛屿布局、相机和所有关卡文件均未改动。
+- 设置面板、路线提示入口／木牌与胜利／纪录横幅造型留待阶段 B／C；本阶段仅统一结算操作按钮底座。
+
+验证：`npm run build`、`npm test`，启动后依次运行 `node tests/stage-a.mjs`、`node tests/menu.mjs`、`node tests/toy-ui.mjs`、`node tests/rewards.mjs`。阶段 A 截图为 `docs/screenshots/stage-a-menu-{desktop,mobile,small,landscape}.png`、`stage-a-office-{desktop,mobile,small,landscape}.png` 和 `stage-a-aim.png`。截图来自 Chromium 实际运行，不是生成图。
+
+对照参考图：本阶段已落实切角拼板、明显侧边、顶部高光、右下接触阴影、金星分面和奶油色力度计外壳；UI 采用可交互的矢量道具层，不是场景替换或参考图贴片。首页开始按钮仍沿用原有锚点、三岛构图及镜头不变。参考中的灯泡提示牌、木框设置和布旗／金色纪录横幅尚未实施，分别属于后续 B、C 阶段。

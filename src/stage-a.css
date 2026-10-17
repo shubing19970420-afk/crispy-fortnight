@@ -1,0 +1,96 @@
+/* Stage A only: physical prop skins. No field/camera/font/route changes. */
+.wood-prop { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; overflow: visible; filter: drop-shadow(3px 8px 5px #355c4d25); }
+#map-labels .map-label, #start.wood-sign, .level-title { isolation: isolate; background: transparent; border: 0; border-radius: 0; box-shadow: none !important; text-shadow: 0 1px #f3c795; }
+#map-labels .map-label { --plank-y: -16px; padding: 16px 24px 14px; min-width: 184px; min-height: 89px; }
+#map-labels .map-label::before, #map-labels .map-label::after { display: none; }
+#map-labels .map-label strong { position: relative; line-height: 1.3; }
+.plank-hangers { position: absolute; top: -13px; left: 25%; width: 8px; height: 23px; background: #a5784f; border-radius: 3px; border-left: 2px solid #e5ba83; box-shadow: 2px 2px #805b3c; z-index: -2; }
+.plank-hangers::after { content: ''; position: absolute; left: 82px; top: 0; width: 6px; height: 23px; border-radius: 3px; background: #a5784f; border-left: 2px solid #e5ba83; box-shadow: 2px 2px #805b3c; }
+.level-number { position: absolute; left: -9px; top: -12px; padding: 4px 8px; background: #fff0be; border: 2px solid #fff7dc; border-radius: 5px 3px 6px 3px; box-shadow: 1px 4px #b99560, 3px 6px 4px #705b4225; transform: rotate(-6deg); color: #355c4d; font-size: 20px; line-height: 1; }
+.difficulty { display: flex; align-items: center; justify-content: center; gap: 4px; height: 28px; margin-top: 4px; pointer-events: none; }
+.difficulty svg { width: 27px; height: 28px; filter: drop-shadow(1px 2px 1px #845f363d); }
+#map-labels .map-label .progress { right: 5px; top: -8px; font-style: normal; font-size: 18px; color: #355c4d; background: #fff0be; border-radius: 50%; width: 22px; height: 22px; display: grid; place-items: center; text-shadow: none; box-shadow: 0 3px #b99560; }
+#map-labels .map-label .progress:empty { display: none; }
+#map-labels .map-label:hover, #map-labels .map-label.active { filter: brightness(1.05); }
+#map-labels .map-label:active { box-shadow: none !important; }
+#start.wood-sign { display: flex; align-items: center; justify-content: center; gap: 14px; padding: 20px 28px 24px; min-width: 218px; min-height: 82px; transform: rotate(-5deg); }
+#start.wood-sign::before, #start.wood-sign::after { display: none; }
+#start.wood-sign strong { margin: 0; position: relative; }
+#start.wood-sign .start-play { font-size: 25px; line-height: 1; color: #355c4d; filter: drop-shadow(0 2px #f8d9a4); }
+#start.wood-sign:hover { transform: rotate(-3deg) translateY(-4px) scale(1.035); }
+#start.wood-sign:active { transform: rotate(-3deg) translateY(5px) scale(.96); }
+/* Ceramic cap, extrusion and contact shadow; pressed state exposes less base. */
+header .icon { width: 66px; height: 64px; border: 2px solid #fff7d9; border-radius: 23px 23px 21px 22px; background: #fff0be; box-shadow: inset 3px 3px #fffae7, inset -3px -4px #ead7a3, 0 3px #cbb682, 0 8px #ad976b, 4px 13px 8px #355c4d28; transition: transform .3s var(--toy-bounce), box-shadow .15s; }
+header .icon-label { display: none; }
+header .icon svg { width: 32px; height: 32px; filter: drop-shadow(0 1px #fffae7); }
+header .icon:hover { transform: translateY(-3px) rotate(-3deg); }
+header .icon:active { transform: translateY(6px) scale(.94,.91); box-shadow: inset 2px 3px 4px #b9a87a55, 0 2px #ad976b, 2px 4px 3px #355c4d25; }
+header .icon.muted { background: #e2d8b2; border-color: #f1e7c9; color: #93664b; }
+.level-title { padding: 13px 25px 20px; left: 108px; top: 14px; min-height: 88px; }
+.level-title h2 { margin-top: 3px; white-space: nowrap; }
+.level-title > span { background: #fff0be; padding: 2px 7px; border-radius: 3px; box-shadow: 1px 2px #b28b5b; display: inline-block; }
+#shot { top: 112px; }
+/* A cast base plus an inset bevel: primary clay, secondary timber. */
+#game .controls > #retry { border: 3px solid #f9c193; background: #ef9166; border-radius: 12px 17px 13px 15px; min-height: 60px; padding: 12px 25px; box-shadow: inset 2px 3px #ffd1a4, inset -3px -3px #dc8057, 0 4px #bd7049, 0 8px #9b5d40, 4px 13px 8px #355c4d25; }
+#game .controls > #retry:hover { transform: translateY(-3px) rotate(-2deg); }
+#game .controls > #retry:active { transform: translateY(6px) scale(.96,.92); box-shadow: inset 1px 3px 4px #9b5d4055, 0 2px #9b5d40; }
+#game .controls { display: flex; gap: 16px; }
+/* Ready and moving: one restart. Success/failure: only settlement actions. */
+body:has(#result:not([hidden])) .game-bottom { visibility: hidden; }
+/* Ten individually coloured toy blocks, physical cream housing and rolling pointer. */
+.feedback { width: 365px; }
+.power-row { position: relative; gap: 12px; }
+.power-row .tee-icon { display: none; }
+.meter { --power: 0; height: 48px; min-width: 100px; border: 7px solid #fff0be; border-radius: 27px 30px 25px 28px; overflow: visible; background: #a7bc87; box-shadow: inset 2px 3px 3px #59734d50, 0 3px #d7c58f, 1px 7px #b5a174, 4px 12px 9px #355c4d26; }
+.meter > i { display: none; }
+.meter-ticks { inset: 2px; border-radius: 17px; background: linear-gradient(90deg,#73a867 0% 10%,#82b66d 10% 20%,#95bf74 20% 30%,#b0c67b 30% 40%,#cbd17a 40% 50%,#ead77e 50% 60%,#f3ce74 60% 70%,#f2ba6a 70% 80%,#e8a362 80% 90%,#d58b56 90%); box-shadow: inset 1px 2px 2px #45694238; }
+.meter-ticks::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: repeating-linear-gradient(90deg,transparent 0 calc(10% - 2px),#fff0be8c calc(10% - 2px) 10%); }
+.power-ball { position: absolute; top: 50%; left: calc(15px + (100% - 30px) * var(--power)); width: 30px; height: 30px; border-radius: 50%; transform: translate(-50%,-50%); background: radial-gradient(circle at 30% 24%,#fffef1 0 35%,#e3dfc5 65%,#bbbba1 100%); border: 1px solid #f9f7e5; box-shadow: inset 1px 2px #fff, 2px 4px 3px #355c4d4d; transition: left .04s; }
+.power-ball::after { content: ''; position: absolute; inset: 6px; border-radius: 50%; background: radial-gradient(circle,#bec1aa 0 1px,transparent 2px) 0 0/6px 6px; opacity: .45; }
+#percent { min-width: 54px; }
+@media(max-width:650px) {
+  header .icon { width: 48px; height: 50px; border-radius: 17px 18px 16px 17px; }
+  header .icon svg { width: 28px; height: 28px; }
+  .header-tools { gap: 10px; }
+  #map-labels .map-label { --plank-y: -22px; min-width: 150px; min-height: 76px; padding: 12px 16px 10px; }
+  #map-labels .map-label strong { line-height: 1.3; }
+  .difficulty { height: 24px; margin-top: 2px; gap: 3px; }
+  .difficulty svg { width: 23px; height: 24px; }
+  .level-number { font-size: 17px; left: -7px; top: -10px; padding: 4px 7px; }
+  .plank-hangers::after { left: 66px; }
+  #start.wood-sign { min-width: 180px; min-height: 70px; padding: 17px 22px 20px; gap: 10px; }
+  #start.wood-sign .start-play { font-size: 21px; }
+  .level-title { left: 79px; top: 13px; padding: 10px 14px 16px; min-height: 79px; max-width: calc(100vw - 208px); }
+  .level-title h2 { white-space: nowrap; }
+  .level-title > span { padding: 1px 4px; }
+  #shot { top: 102px; }
+  .feedback { width: 100%; }
+  .meter { height: 43px; border-width: 6px; }
+  .power-ball { width: 28px; height: 28px; }
+  #game .controls { gap: 12px; }
+  #game .controls > #retry { min-height: 54px; padding: 10px 20px; flex: 1; }
+  #route-dock { flex: 1.3; }
+  #route-drawer { min-height: 54px; }
+}
+@media(max-width:370px) {
+  .level-title { left: 74px; padding-left: 10px; padding-right: 10px; max-width: calc(100vw - 202px); }
+  header .icon { width: 44px; }
+  .header-tools { gap: 8px; }
+  #start.wood-sign { min-width: 166px; padding-left: 18px; padding-right: 18px; }
+}
+@media(max-height:530px) and (min-width:651px) {
+  #map-labels .map-label { min-height: 66px; min-width: 160px; padding: 10px 18px 9px; --plank-y: -16px; }
+  .difficulty { height: 22px; margin-top: 1px; }
+  .difficulty svg { width: 21px; height: 22px; }
+  #start.wood-sign { min-height: 64px; padding: 13px 20px 16px; min-width: 185px; }
+  .level-title { min-height: 70px; padding-top: 8px; padding-bottom: 14px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  header .icon, #map-labels .map-label, #start.wood-sign, #game .controls > #retry, .power-ball { transition: none; }
+}
+/* Keep the HUD in a stable compositing layer above the WebGL canvas. */
+header .header-tools { transform: translateZ(0); }
+/* Settlement buttons share the same bases; ribbon artwork waits for stage C. */
+.result-actions button { position: relative; border: 2px solid #efc48f; border-radius: 10px 15px 11px 13px; background: #dfb17f; color: #355c4d; box-shadow: inset 2px 3px #f5d29f, inset -2px -3px #c79765, 0 4px #b38151, 0 7px #956a46, 3px 10px 6px #355c4d20; padding: 12px 18px; }
+.result-actions #next { background: #80b67c; border-color: #b3d69a; box-shadow: inset 2px 3px #c5dda8, inset -2px -3px #72a46c, 0 4px #5c8a5d, 0 7px #46734f, 3px 10px 6px #355c4d20; }
+.result-actions button:active { transform: translateY(5px) scale(.96,.93); box-shadow: inset 1px 3px #355c4d20, 0 2px #956a46; }
