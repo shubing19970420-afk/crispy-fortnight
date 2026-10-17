@@ -124,10 +124,13 @@ npm run preview
 
 新增验证：`npm test` 包含成绩分类、损坏存储、32 个巡逻阶段及不可通行布局测试；`npm run test:rewards` 验证真实拖拽、三次失败提醒、路线开关、参考路线通关、成绩保存及横幅。
 
-### 正式 Logo 素材待接收
+### 正式 Logo
 
-当前任务仅向模型提供了 `game-logo.png` 图片预览，执行环境没有原始 PNG 文件，也没有可下载附件标识。没有重新生成或擅自重绘；暂保留旧文字 Logo。收到原文件后将直接保存到 `src/assets/game-logo.png`，由 Vite 处理素材地址，保持透明通道及比例。此项未完成，不能把当前首页截图当作正式 Logo 已替换的证明。
+首页直接引用用户提交的 `src/assets/game-logo.png`（2023×777，RGBA 透明 PNG），未重绘、裁剪、压缩或修改原文件。Vite 将原图打包为带哈希的素材；缺失文件时构建会报错。通过 CSS 等比缩放适配桌面和手机，标题区域不接收指针事件，保留三座岛屿及所有选关交互。
 
-本轮截图：[首页](docs/screenshots/menu.png) · [移动端选关](docs/screenshots/menu-mobile.png) · [胜利横幅](docs/screenshots/victory-banner.png) · [第三关推荐路线](docs/screenshots/office-route.png)。首页截图仍是旧 Logo（原始 PNG 接收受阻，见上文）。
+本轮截图：[首页](docs/screenshots/menu.png) · [移动端选关](docs/screenshots/menu-mobile.png) · [胜利横幅](docs/screenshots/victory-banner.png) · [第三关推荐路线](docs/screenshots/office-route.png)。首页截图已更新为正式 PNG Logo。
 
 本轮验证结果：物理与成绩单测通过（含 240 次压力击球、32 个巡逻阶段路线搜索）；三关真实鼠标击球、移动人物碰撞、失败重试、触屏击球、后台暂停、遮挡淡化、三岛选关和场景资源释放通过。新增成绩/辅助浏览器测试通过，包括首页实际点击、失败结算提示入口、推荐杆手动进洞、持久化及通关重置。`npm run build` 通过；仍有 Three.js 主包超过 500 kB 的体积提示，不影响构建。
+
+正式 Logo 接入验证：桌面 1440×960、手机 390×844、横屏 844×390、小屏 320×640 均成功解码并按原始比例显示；Logo 与三关入口及名称不重叠。构建输出 PNG 与用户提交原图的 SHA-256 完全相同。物理/成绩单测及构建通过。
+选关回归通过：三个岛屿的鼠标、键盘、触屏选择、悬停反馈、镜头切换及重复进出时的资源释放均正常。补充截图：[手机横屏](docs/screenshots/menu-landscape.png) · [320px 小屏](docs/screenshots/menu-small.png)。
