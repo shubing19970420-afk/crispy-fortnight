@@ -1,5 +1,7 @@
 import "./style.css";
 import "./toy-ui.css";
+import "./fonts.css";
+import "./typography.css";
 import { icon } from "./ui-icons";
 import gameLogo from "./assets/game-logo.png";
 import { levels } from "./levels";
@@ -13,10 +15,10 @@ function boot() {
   const app = document.querySelector<HTMLDivElement>("#app")!;
   app.innerHTML = `<div class="cloud cloud-a"></div><div class="cloud cloud-b"></div><div id="viewport"><canvas aria-label="立体高尔夫球场：按住白球向后拖拽，松手击球"></canvas></div>
 <header><button id="home" class="icon" aria-label="返回选关">${icon("home")}</button><div class="header-tools"><button id="sound" class="icon" aria-label="关闭音效" aria-pressed="true">${icon("sound")}<span class="icon-label">音效开</span></button><button id="settings-open" class="icon" aria-label="打开设置" aria-haspopup="dialog">${icon("settings")}<span class="icon-label">设置</span></button></div></header>
-<section id="menu"><div class="logo has-official-logo"><h1><img class="official-logo" src="${gameLogo}" width="2023" height="777" alt="一杆归洞" draggable="false" fetchpriority="high"></h1><p>微 缩 世 界 <i>一杆出发！</i></p></div><div class="map-caption"><span>你的下一杆，落在哪个世界？</span></div><div id="map-labels">${destinations.map((d, i) => `<button class="map-label" data-level="${i}" aria-label="进入第${i + 1}关 ${d.title}"><span class="island-name">${d.theme}</span><strong>${d.title}</strong><small>${d.feature}</small><i class="progress"></i><b class="enter-mark">↗</b></button>`).join("")}</div><button id="start" class="wood-sign"><small>第一次来？</small><strong>从这里出发 <span>➜</span></strong></button><button id="menu-assist" class="assist-setting" aria-pressed="false">⚑ 办公室路线辅助：关闭</button><p class="map-help">点击小岛，开启一杆冒险 <span>· 也可用 Tab 选择，Enter 出发</span></p></section>
-<section id="game" hidden><div class="level-title"><span id="subtitle"></span><h2 id="title"></h2></div><div id="shot" class="shot">● 一杆机会</div><div id="tutorial" hidden><span class="hand">☝</span><strong>按住白球，向后拉</strong><span>松手击球 · 拉得越远越有力</span><button id="tutorial-close">知道了，试试看</button></div><div class="game-bottom"><div class="feedback"><span id="status" role="status" aria-live="polite">拖拽白球以瞄准</span><div class="power-row"><span class="tee-icon">⚑</span><div class="meter"><i id="power"></i><span class="meter-ticks"></span></div><b id="percent">0%</b></div></div><div class="controls"><button id="retry">↻ 重新开始</button><button id="back">▦ 返回选关</button><aside id="route-dock" hidden><button id="route-drawer" aria-expanded="false" aria-controls="route-content">⚑ 路线小贴士 <span aria-hidden="true">⌃</span></button><div id="route-content" hidden><h3>绕行与反弹</h3><p class="route-note">沿虚线首段瞄准，自己出杆。</p><div id="route-help" hidden role="status"><span id="route-message"></span><button id="offer-route" hidden>显示推荐路线</button></div><button id="route-toggle" aria-pressed="false">⚑ 显示推荐路线</button></div></aside></div><p id="hint"></p></div></section>
-<dialog id="settings" aria-labelledby="settings-title"><div class="settings-head"><div><span class="settings-kicker">微缩世界 · 偏好</span><h2 id="settings-title">小小设置</h2></div><button id="settings-close" class="icon" aria-label="关闭设置">${icon("close")}</button></div><p class="settings-note">调整好了，再来一杆。</p><div class="setting-row"><div><strong>游戏音效</strong><small>击球、碰撞与进洞</small></div><button id="settings-sound" class="toy-switch" role="switch" aria-label="游戏音效" aria-checked="true"><span class="switch-knob"></span><b>开</b></button></div><div class="setting-row"><div><strong>办公室路线辅助</strong><small>仅第三关 · 保留手动击球</small></div><button id="settings-assist" class="toy-switch" role="switch" aria-label="办公室路线辅助" aria-checked="false"><span class="switch-knob"></span><b>关</b></button></div><p class="settings-instructions">按住白球向后拉 · 松手出发</p><button id="settings-done">调好了，回去玩 →</button></dialog>
-<div id="result" hidden><div class="resultbox" role="dialog" aria-modal="true" aria-labelledby="result-title"><div class="ribbon-confetti" aria-hidden="true"><i style="--n:0">★</i><i style="--n:1">▪</i><i style="--n:2">▪</i><i style="--n:3">★</i><i style="--n:4">▪</i><i style="--n:5">▪</i><i style="--n:6">★</i><i style="--n:7">▪</i><i style="--n:8">▪</i><i style="--n:9">★</i><i style="--n:10">▪</i><i style="--n:11">▪</i></div><div id="stars">✦ ★ ✦</div><span id="result-label"></span><h2 id="result-title"></h2><p id="result-text"></p><div id="result-stats" hidden><div><small>本次用时</small><strong id="score-time"></strong></div><div><small>历史最佳</small><strong id="score-best"></strong></div><div><small>反弹次数</small><strong id="score-bounces"></strong></div></div><div id="result-route-offer" hidden><span>需要一点路线提示吗？</span><button id="result-route">显示推荐路线</button></div><div class="result-actions"><button id="next" class="primary">下一关 →</button><button id="retry-result">↻ 再试一次</button><button id="result-menu">返回选关</button></div></div></div><div id="webgl-error" hidden role="alert"><h2>这个小世界暂时无法打开</h2><p>游戏需要 WebGL。请使用较新的 Chrome、Edge、Firefox 或 Safari，并开启浏览器硬件加速后刷新页面。</p><button onclick="location.reload()">重新加载</button></div>`;
+<section id="menu"><div class="logo has-official-logo"><h1><img class="official-logo" src="${gameLogo}" width="2023" height="777" alt="一杆归洞" draggable="false" fetchpriority="high"></h1></div><div id="map-labels">${destinations.map((d, i) => `<button class="map-label" data-level="${i}" aria-label="进入第${i + 1}关 ${d.title}"><strong>${d.title}</strong><i class="progress"></i><b class="enter-mark">↗</b></button>`).join("")}</div><button id="start" class="wood-sign"><strong>开始游戏 <span>➜</span></strong></button><button id="menu-assist" class="assist-setting" aria-pressed="false">⚑ 办公室路线辅助：关闭</button></section>
+<section id="game" hidden><div class="level-title"><span id="subtitle"></span><h2 id="title"></h2></div><div id="shot" class="shot">● 一杆机会</div><div id="tutorial" hidden><span class="hand">☝</span><strong>拖拽白球，松手击球</strong><button id="tutorial-close">知道了</button></div><div class="game-bottom"><div class="feedback"><span id="status" role="status" aria-live="polite">拖拽白球以瞄准</span><div class="power-row"><span class="tee-icon">⚑</span><div class="meter"><i id="power"></i><span class="meter-ticks"></span></div><b id="percent">0%</b></div></div><div class="controls"><button id="retry">↻ 重试</button><button id="back">▦ 选关</button><aside id="route-dock" hidden><button id="route-drawer" aria-expanded="false" aria-controls="route-content">路线提示 <span aria-hidden="true">⌃</span></button><div id="route-content" hidden><h3>路线提示</h3><p class="route-note">沿虚线首段出杆。</p><div id="route-help" hidden role="status"><span id="route-message"></span><button id="offer-route" hidden>显示路线</button></div><button id="route-toggle" aria-pressed="false">⚑ 显示路线</button></div></aside></div><p id="hint"></p></div></section>
+<dialog id="settings" aria-labelledby="settings-title"><div class="settings-head"><div><h2 id="settings-title">设置</h2></div><button id="settings-close" class="icon" aria-label="关闭设置">${icon("close")}</button></div><div class="setting-row"><div><strong>音效</strong></div><button id="settings-sound" class="toy-switch" role="switch" aria-label="游戏音效" aria-checked="true"><span class="switch-knob"></span><b>开</b></button></div><div class="setting-row"><div><strong>第三关路线辅助</strong></div><button id="settings-assist" class="toy-switch" role="switch" aria-label="办公室路线辅助" aria-checked="false"><span class="switch-knob"></span><b>关</b></button></div><button id="settings-done">返回游戏</button></dialog>
+<div id="result" hidden><div class="resultbox" role="dialog" aria-modal="true" aria-labelledby="result-title"><div class="ribbon-confetti" aria-hidden="true"><i style="--n:0">★</i><i style="--n:1">▪</i><i style="--n:2">▪</i><i style="--n:3">★</i><i style="--n:4">▪</i><i style="--n:5">▪</i><i style="--n:6">★</i><i style="--n:7">▪</i><i style="--n:8">▪</i><i style="--n:9">★</i><i style="--n:10">▪</i><i style="--n:11">▪</i></div><div id="stars">✦ ★ ✦</div><span id="result-label"></span><h2 id="result-title"></h2><p id="result-text"></p><div id="result-stats" hidden><div><small>本次用时</small><strong id="score-time"></strong></div><div><small>历史最佳</small><strong id="score-best"></strong></div><div><small>反弹次数</small><strong id="score-bounces"></strong></div></div><div id="result-route-offer" hidden><span>需要路线提示吗？</span><button id="result-route">显示路线</button></div><div class="result-actions"><button id="next" class="primary">下一关 →</button><button id="retry-result">↻ 再试一次</button><button id="result-menu">返回选关</button></div></div></div><div id="webgl-error" hidden role="alert"><h2>这个小世界暂时无法打开</h2><p>游戏需要 WebGL。请使用较新的 Chrome、Edge、Firefox 或 Safari，并开启浏览器硬件加速后刷新页面。</p><button onclick="location.reload()">重新加载</button></div>`;
   const el = (id: string) => document.getElementById(id)!;
   const canvas = document.querySelector("canvas")!;
   const settings = el("settings") as HTMLDialogElement;
@@ -48,9 +50,9 @@ function boot() {
     if(e.data.generation!==generation || screen!=="game" || index!==2 || !assist || ball.state!=="ready") return;
     route=e.data.route && ball.time-e.data.time<=.5?e.data.route:null;
     view.showRoute(route?.points);
-    el("route-message").textContent=route?`推荐力度 ${Math.round(route.power/150*100)}% · 当前时机可行`:"同事正在经过，稍等出杆窗口…";
+    el("route-message").textContent=route?`推荐力度 ${Math.round(route.power/150*100)}% · 可出杆`:"等待同事经过";
   };
-  routeWorker.onerror=()=>{workerAvailable=false;searching=false;route=null;view.showRoute();el("route-message").textContent="路线辅助暂不可用，请重载后再试";};
+  routeWorker.onerror=()=>{workerAvailable=false;searching=false;route=null;view.showRoute();el("route-message").textContent="提示不可用，请重载";};
   let completed: number[] = [];
   let settled=false, assist=false, failures=[0,0,0], nextHint=0, route:Route|null=null, scoreFrame=0;
   try { assist=localStorage.getItem("golf-assist")==="on"; const f=JSON.parse(localStorage.getItem("golf-failures")||"[]"); failures=failures.map((_,i)=>Number.isSafeInteger(f?.[i])&&f[i]>=0?f[i]:0); } catch {}
@@ -130,7 +132,7 @@ function boot() {
     el("game").hidden = false;
     el("result").hidden = true;
     el("title").textContent = levels[i].name;
-    el("subtitle").textContent = `第 0${i + 1} 关 / 微缩世界`;
+    el("subtitle").textContent = `第 0${i + 1} 关`;
     el("hint").textContent = [
       "箭头指向出球方向",
       "北侧缺口 → 南侧缺口",
@@ -147,6 +149,7 @@ function boot() {
   function dismissTutorial() {
     tutorialSeen = true;
     el("tutorial").hidden = true;
+    update();
     try {
       localStorage.setItem("golf-tutorial", "seen");
     } catch {}
@@ -158,21 +161,21 @@ function boot() {
     el("power").style.width = `${d * 100}%`;
     el("percent").textContent = `${Math.round(d * 100)}%`;
     el("shot").textContent =
-      ball.state === "ready" ? "● 一杆机会" : "○ 机会已使用";
+      ball.state === "ready" ? "仅一杆" : "已击球";
     el("status").textContent =
       ball.state === "ready"
-        ? drag
-          ? "向后蓄力 · 松手出发！"
+        ? !tutorialSeen && !drag ? "" : drag
+          ? "松手击球"
           : index === 2
-            ? "观察同事 · 拖拽出发"
+            ? "观察同事后出杆"
             : index === 1
-              ? "北缺口 → 南缺口 · 一杆折返"
-              : "按住白球向后拉 · 松手击球"
+              ? "借墙反弹"
+              : "拖拽白球，松手击球"
         : ball.state === "moving"
-          ? "滚动中… 看它的！"
+          ? "滚动中"
           : ball.state === "won"
-            ? "好球！正在归洞"
-            : "球停住了 · 再试一杆";
+            ? "进洞"
+            : "未进洞";
   }
   function result() {
     if(settled) return;
@@ -206,21 +209,21 @@ function boot() {
     syncAssist(); update();
   }
   function syncAssist() {
-    el("menu-assist").textContent=`⚑ 办公室路线辅助：${assist?"开启":"关闭"}`;
+    el("menu-assist").textContent=`第三关提示：${assist?"开":"关"}`;
     el("menu-assist").setAttribute("aria-pressed",String(assist));
     el("route-dock").hidden=index!==2;
     el("settings-assist").setAttribute("aria-checked",String(assist));
     el("settings-assist").querySelector("b")!.textContent=assist?"开":"关";
-    el("route-toggle").textContent=assist?"⚑ 关闭路线":"⚑ 显示推荐路线";
+    el("route-toggle").textContent=assist?"关闭路线":"显示路线";
     el("route-toggle").setAttribute("aria-pressed",String(assist));
     const offer=index===2&&!assist&&failures[2]>=3;
     el("route-drawer").classList.toggle("has-offer",offer);
     el("route-toggle").hidden=offer;
     el("route-help").hidden=screen!=="game"||index!==2||(!assist&&!offer);
     el("offer-route").hidden=!offer;
-    if(offer) el("route-message").textContent="需要一点路线提示吗？";
+    if(offer) el("route-message").textContent="需要路线提示吗？";
     if(!assist) {route=null; view.showRoute();}
-    else el("route-message").textContent="正在验证当前出杆窗口…";
+    else el("route-message").textContent="正在验证路线…";
   }
   function toggleAssist() {
     assist=!assist; nextHint=0; generation++;
@@ -230,6 +233,7 @@ function boot() {
   function setRouteOpen(open: boolean) {
     el("route-content").hidden=!open;
     el("route-drawer").setAttribute("aria-expanded",String(open));
+    el("route-drawer").firstChild!.textContent=open?"收起提示 ":"路线提示 ";
     document.body.classList.toggle("route-open",open);
   }
   el("route-drawer").onclick=()=>setRouteOpen(el("route-content").hidden);
@@ -413,7 +417,7 @@ function boot() {
     }
     if (screen === "game") {
       if(index===2 && assist && ball.state==="ready" && ball.time>=nextHint) {
-        if(route && ball.time-route.launchAt>.5) {route=null; view.showRoute();el("route-message").textContent="正在验证当前出杆窗口…";}
+        if(route && ball.time-route.launchAt>.5) {route=null; view.showRoute();el("route-message").textContent="正在验证路线…";}
         if(!searching && workerAvailable) {
           nextHint=ball.time+.25; searching=true;
           routeWorker.postMessage({level:levels[index],time:ball.time,generation});

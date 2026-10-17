@@ -1,0 +1,29 @@
+{
+  "title": {
+    "family": "Maoken Assorted Sans",
+    "version": "Version 1.70",
+    "source": "https://github.com/maoken-fonts/MaokenAssortedSans",
+    "commit": "f01a94115444beaa60d7aefa9544fd123fb48d71",
+    "sourceFile": "font/MaokenAssortedSans.ttf",
+    "sourceSha256": "29b4fea4dfaf50be4b9ede602cc713eca1e411e0b498b74e8ea41f2c68f6fb90",
+    "localFile": "maoken/MaokenAssortedSans.woff2",
+    "sha256": "b7ec185a8ad14666419a3c7f4269728e62a8f5dd1d5f0a604a3f75c3df9e7e41",
+    "license": "SIL OFL 1.1",
+    "licenseFile": "maoken/OFL.txt",
+    "fontWeight": 400,
+    "unicodeMappingCount": 31220,
+    "uiChineseCoverage": 207,
+    "conversion": "FontTools 4.61.1; WOFF2 with no glyph transforms, subsetting, renaming or metadata changes; original SFNT tables verified except head checksum and WOFF2 compression flag. See OFL FAQ 2.2, 2.7 and 2.8."
+  },
+  "body": {
+    "requested": "Alimama FangYuanTi VF",
+    "status": "pending-official-font-and-license",
+    "reason": "Official fonts.alibabagroup.com and font download domains return network access 403. No third-party font was downloaded.",
+    "activeFallback": "HuangYou",
+    "fontWeight": 400,
+    "emphasisWeight": 400,
+    "license": "SIL OFL 1.1",
+    "licenseFile": "HuangYou-OFL.txt",
+    "requiredFiles": "Official WOFF2 or TTF variable font and its accompanying embedding/redistribution license."
+  }
+}

@@ -1,7 +1,6 @@
 :root {
   font-family:
-    "Arial Rounded MT Bold", "Trebuchet MS", "PingFang SC", "Microsoft YaHei",
-    sans-serif;
+    var(--font-body);
   color: #244d45;
   background: #aed3cd;
   font-synthesis: none;
@@ -854,10 +853,8 @@ canvas {
 }
 
 /* Local OFL fonts: artwork titles / playful controls / readable body. */
-@font-face{font-family:Smiley;src:url('/fonts/SmileySans.woff2') format('woff2');font-weight:400;font-display:swap}
-@font-face{font-family:HuangYou;src:url('/fonts/HuangYou.woff2') format('woff2');font-weight:400;font-display:swap}
-button,.wood-sign strong,.island-name,#shot,#tutorial strong{font-family:HuangYou,'Microsoft YaHei',sans-serif;font-weight:400}
-.map-label strong,.level-title h2,#result-title{font-family:Smiley,'Microsoft YaHei',sans-serif;font-weight:400}
+button,.wood-sign strong,.island-name,#shot,#tutorial strong{font-family:var(--font-title);font-weight:400}
+.map-label strong,.level-title h2,#result-title{font-family:var(--font-title);font-weight:400}
 .map-label strong{font-size:26px;text-shadow:0 2px #fff3cf,1px 3px #fff3cf}
 #result-title{font-size:clamp(40px,7vw,78px);color:#fff3cf;-webkit-text-stroke:1.5px #285c4c;paint-order:stroke fill;text-shadow:2px 4px #285c4c,4px 7px #285c4c;transform:rotate(-3deg);margin:12px 0 20px}
 .assist-setting{position:absolute;right:26px;bottom:42px;background:transparent;border:0;box-shadow:none;font-size:17px;color:#27584d;padding:10px;transform:rotate(2deg)}
@@ -869,11 +866,11 @@ button,.wood-sign strong,.island-name,#shot,#tutorial strong{font-family:HuangYo
 #result.victory .resultbox:before,#result.victory .resultbox:after{content:'';position:absolute;z-index:-1;top:28px;bottom:25px;width:65px;background:#ed9160;filter:drop-shadow(0 7px #985e45)}
 #result.victory .resultbox:before{right:calc(100% - 10px);clip-path:polygon(0 0,100% 8%,100% 90%,0 100%,24% 50%)}
 #result.victory .resultbox:after{left:calc(100% - 10px);clip-path:polygon(0 8%,100% 0,76% 50%,100% 100%,0 90%)}
-#result-label{display:inline-block;font-family:HuangYou,sans-serif;font-size:24px;color:#285c4c;letter-spacing:1px}
+#result-label{display:inline-block;font-family:var(--font-body);font-size:24px;color:#285c4c;letter-spacing:1px}
 #stars{font-size:25px;letter-spacing:14px;color:#fff3cf;text-shadow:0 3px #b77a48}
 #result-text{font-size:15px;margin:12px 0}
 #result-stats{display:flex;justify-content:center;gap:32px;margin:20px 0 25px;padding:15px 0;border-top:2px dashed #b77a4870;border-bottom:2px dashed #b77a4870}
-#result-stats div{display:grid;gap:8px}#result-stats small{color:#496344;font-size:14px}#result-stats strong{font-family:Smiley,sans-serif;font-size:30px;font-weight:400;font-variant-numeric:tabular-nums;color:#254c42}
+#result-stats div{display:grid;gap:8px}#result-stats small{color:#496344;font-size:14px}#result-stats strong{font-family:var(--font-body);font-size:30px;font-weight:400;font-variant-numeric:tabular-nums;color:#254c42}
 .new-record #result-label{animation:record-stamp .5s .12s both}.new-record #score-best{color:#b74230}
 .result-actions button{font-size:23px;transition:transform .18s cubic-bezier(.2,1.6,.4,1)}.result-actions button:hover{transform:translateY(-3px) rotate(-2deg)}.result-actions button:active{transform:translateY(3px) scale(.96)}
 .ribbon-confetti{position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:-1}.ribbon-confetti i{position:absolute;left:calc(8% + var(--n)*7.6%);top:35%;font-size:calc(15px + mod(var(--n),3)*4px);color:#fff3cf;font-style:normal;opacity:0;animation:ribbon-confetti .85s .05s ease-out both;--turn:calc(var(--n)*43deg)}
@@ -886,7 +883,7 @@ button,.wood-sign strong,.island-name,#shot,#tutorial strong{font-family:HuangYo
 @media(prefers-reduced-motion:reduce){#result.victory .resultbox,.new-record #result-label,.ribbon-confetti i{animation:none}.ribbon-confetti{display:none}}
 .logo.has-official-logo{transform:none;top:22px;left:4.5%;width:clamp(270px,34vw,540px)}
 .official-logo{display:block;width:100%;height:auto;object-fit:contain;user-select:none;pointer-events:none}
-.logo.has-official-logo p{margin:0 0 0 10%;font-family:HuangYou,sans-serif}
+.logo.has-official-logo p{margin:0 0 0 10%;font-family:var(--font-body)}
 @media(max-width:650px){.logo.has-official-logo{top:18px;left:18px;width:clamp(220px,66vw,330px)}}
 #result-route-offer{display:grid;gap:12px;justify-items:center;margin:20px 0;font-size:16px;color:#285c4c}
 #result-route{font-size:22px;background:#f1bf63;color:#285c4c;padding:10px 18px;box-shadow:0 5px #b57f48}

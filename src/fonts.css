@@ -1,0 +1,42 @@
+/* Authoritative local faces and roles. No online CDN or unverified font URL. */
+@font-face {
+  font-family: "Maoken Assorted Sans";
+  src: url("/fonts/maoken/MaokenAssortedSans.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Title Loading Fallback";
+  src: url("/fonts/HuangYou.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  /* Match Maoken's full-width Chinese advance and vertical metrics. */
+  size-adjust: 130.71895%;
+  ascent-override: 65.74219%;
+  descent-override: 10.75781%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: HuangYou;
+  src: url("/fonts/HuangYou.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: Smiley;
+  src: url("/fonts/SmileySans.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+:root {
+  --font-title: "Maoken Assorted Sans", "Title Loading Fallback", HuangYou, sans-serif;
+  /* FangYuan VF is pending its official package and embedding license. */
+  --font-body: HuangYou, sans-serif;
+  --font-body-weight: 400;
+  --font-body-emphasis: 400;
+  font-synthesis: none;
+}

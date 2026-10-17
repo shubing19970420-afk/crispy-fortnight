@@ -7,8 +7,8 @@ const errors=[];page.on('pageerror',e=>errors.push(e.message));
 const url=process.env.GOLF_URL||'http://127.0.0.1:5173';
 try {
  await page.goto(url);await page.waitForFunction(()=>window.golfDebug?.menu());
- await page.evaluate(async()=>{await Promise.all([document.fonts.load("24px Smiley","0123456789"),document.fonts.load("24px HuangYou","一杆归洞")]);await document.fonts.ready;});
- assert.ok(await page.evaluate(()=>document.fonts.check('24px Smiley')&&document.fonts.check('24px HuangYou')));
+ await page.evaluate(async()=>{await Promise.all([document.fonts.load('24px "Maoken Assorted Sans"',"一杆归洞0123456789"),document.fonts.load("24px HuangYou","一杆归洞")]);await document.fonts.ready;});
+ assert.ok(await page.evaluate(()=>document.fonts.check('24px "Maoken Assorted Sans"')&&document.fonts.check('24px HuangYou')));
  await page.locator('#menu-assist').click();assert.equal(await page.locator('#menu-assist').getAttribute('aria-pressed'),'true');await page.locator('#menu-assist').click();assert.equal(await page.locator('#menu-assist').getAttribute('aria-pressed'),'false');
  await fs.mkdir('test-results',{recursive:true});
  await page.screenshot({path:'test-results/menu-fonts.png'});
@@ -33,7 +33,7 @@ try {
  for(let n=0;n<3;n++){await shot(7,0);await page.locator('#result').waitFor({state:'visible',timeout:40000});if(n===2){assert.equal(await page.locator('#result-route-offer').isVisible(),true);assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('golf-failures'))[2]),3);await page.locator('#result-route').click();}else await page.locator('#retry-result').click();}
  await page.waitForFunction(()=>window.golfDebug.hint(),{},{timeout:40000});
  await toggleHints();
- assert.equal(await page.locator('#route-message').textContent(),'需要一点路线提示吗？');
+ assert.equal(await page.locator('#route-message').textContent(),'需要路线提示吗？');
  await openHints();await page.locator('#offer-route').click();
  await page.waitForFunction(()=>window.golfDebug.hint(),{},{timeout:40000});
  assert.ok((await page.locator('#route-message').textContent()).includes('推荐力度'));
