@@ -106,25 +106,28 @@ try {
       await page.mouse.up();
     }
   }
-  const starts = [
-    { x: 180, y: 280 },
-    { x: 180, y: 360 },
-    { x: 150, y: 390 },
-  ];
+  const starts = solutions.map((s) => s.start);
   for (let i = 0; i < 3; i++) {
     await openLevel(i, true);
     await stable();
     if (await page.locator("#tutorial").isVisible())
       await page.locator("#tutorial-close").click();
-    for (const { rect, bounds } of await page.evaluate(() =>
-      window.golfDebug.colliders(),
-    ))
+    const geometry = await page.evaluate(() => window.golfDebug.colliders());
+    for (const { rect, bounds } of geometry.rects)
       for (const key of ["x", "y", "w", "h"])
         assert.ok(
           Math.abs(rect[key] - bounds[key]) < 0.01,
-          `level ${i + 1} ${key} collider alignment`,
+          `level ${i + 1} rectangle ${key}`,
+        );
+    for (const { circle, bounds } of geometry.circles)
+      for (const key of ["x", "y", "r"])
+        assert.ok(
+          Math.abs(circle[key] - bounds[key]) < 0.01,
+          `level ${i + 1} circle ${key}`,
         );
     await page.screenshot({ path: `test-results/level-${i + 1}.png` });
+    if (i === 2)
+      await page.waitForFunction(() => window.golfDebug.state().time % 8 < 2.3);
     await shoot(solutions[i].dx, solutions[i].dy, starts[i]);
     const first = await page.evaluate(() => window.golfDebug.state());
     assert.equal(first.state, "moving");
@@ -141,10 +144,20 @@ try {
       { timeout: 40000 },
     );
     const state = await page.evaluate(() => window.golfDebug.state());
-    assert.equal(state.bounces, i === 0 ? 0 : 1);
+    assert.equal(state.bounces, solutions[i].bounces);
+    if (i === 2)
+      assert.ok(
+        (
+          await page.evaluate(() => window.golfDebug.course().upperOpacity)
+        ).some((p) => p < 0.3),
+        "overhead desk fades near hole",
+      );
     await page
       .getByText("一杆，归洞。", { exact: true })
       .waitFor({ timeout: 15000 });
+    assert.ok(
+      (await page.locator("#result-text").textContent()).includes("最佳"),
+    );
     if (i === 2) await page.screenshot({ path: "test-results/success.png" });
     if (i < 2) {
       await page.locator("#next").click();
@@ -160,6 +173,38 @@ try {
       "drag, projection, collider bounds, win, navigation",
     );
   }
+  await openLevel(2);
+  await page.waitForFunction(
+    () => {
+      const t = window.golfDebug.state().time % 8;
+      return t > 4.1 && t < 4.3;
+    },
+    {},
+    { timeout: 60000 },
+  );
+  await shoot(solutions[2].dx, solutions[2].dy, starts[2]);
+  await page.waitForFunction(
+    () => window.golfDebug.state().hits.includes("colleague"),
+    {},
+    { timeout: 40000 },
+  );
+  assert.ok(
+    (await page.evaluate(() => window.golfDebug.course().arms)).some(
+      (a) => Math.abs(a) > 0.2,
+    ),
+  );
+  await page.screenshot({ path: "test-results/actor-hit.png" });
+  await page.waitForFunction(
+    () => window.golfDebug.state().state === "lost",
+    {},
+    { timeout: 60000 },
+  );
+  await page.locator("#retry-result").click();
+  assert.ok((await page.evaluate(() => window.golfDebug.state())).time < 0.3);
+  await page.locator("#home").click();
+  console.log(
+    "PASS deterministic colleague hit, surprise, failed timing and clock reset",
+  );
   await openLevel(0);
   await shoot(8, 0, starts[0]);
   await page

@@ -14,7 +14,18 @@ export class Sound {
     if (this.enabled) this.unlock();
     return this.enabled;
   }
-  play(kind: "shot" | "wood" | "rubber" | "win", power = 1) {
+  play(
+    kind:
+      | "shot"
+      | "wood"
+      | "rubber"
+      | "win"
+      | "stone"
+      | "leaves"
+      | "fabric"
+      | "person",
+    power = 1,
+  ) {
     if (!this.enabled) return;
     this.unlock();
     const c = this.context;
@@ -22,12 +33,31 @@ export class Sound {
     const notes =
       kind === "win"
         ? [523, 659, 784, 1047]
-        : [kind === "shot" ? 210 : kind === "rubber" ? 330 : 125];
+        : [
+            kind === "shot"
+              ? 210
+              : kind === "stone"
+                ? 78
+                : kind === "leaves"
+                  ? 560
+                  : kind === "fabric"
+                    ? 110
+                    : kind === "person"
+                      ? 420
+                      : kind === "rubber"
+                        ? 330
+                        : 125,
+          ];
     notes.forEach((freq, i) => {
       const o = c.createOscillator(),
         g = c.createGain(),
         at = c.currentTime + i * 0.105;
-      o.type = kind === "wood" ? "triangle" : "sine";
+      o.type =
+        kind === "wood" || kind === "person"
+          ? "triangle"
+          : kind === "stone"
+            ? "square"
+            : "sine";
       o.frequency.setValueAtTime(freq, at);
       if (kind !== "win")
         o.frequency.exponentialRampToValueAtTime(freq * 0.45, at + 0.12);
@@ -44,6 +74,10 @@ export class Sound {
       g.connect(c.destination);
       o.start(at);
       o.stop(at + 0.35);
+      o.onended = () => {
+        o.disconnect();
+        g.disconnect();
+      };
     });
   }
 }

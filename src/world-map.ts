@@ -11,13 +11,13 @@ export const destinations = [
   {
     title: "请走弯路",
     theme: "森林岛",
-    feature: "借墙 · 找到弯路",
+    feature: "双折返 · 绕过树林",
     color: "#388c79",
   },
   {
     title: "办公室高尔夫",
     theme: "办公室岛",
-    feature: "文具之间 · 一杆穿行",
+    feature: "家具之间 · 注意同事",
     color: "#ee9464",
   },
 ];

@@ -1,4 +1,5 @@
 import * as T from "three";
+import { CourseModels } from "./course-models";
 import { WorldMap } from "./world-map";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { levels, WIDTH, HEIGHT, type Level, type Rect } from "./levels";
@@ -19,6 +20,7 @@ export class GolfScene {
   aim = new T.Group();
   particles = new T.Group();
   colliders: { rect: Rect; mesh: T.Object3D }[] = [];
+  private course?: CourseModels;
   private ray = new T.Raycaster();
   private plane = new T.Plane(new T.Vector3(0, 1, 0), 0);
   private level: Level = levels[0];
@@ -150,7 +152,7 @@ export class GolfScene {
     m.position.set(x, 0.35, z);
     this.root.add(m);
   }
-  private label(
+  label(
     text: string,
     x: number,
     y: number,
@@ -196,6 +198,7 @@ export class GolfScene {
     });
     this.root.clear();
     this.colliders = [];
+    this.course = undefined;
     this.capture = undefined;
     this.burstTime = -1;
     this.lastBall = undefined;
@@ -235,29 +238,36 @@ export class GolfScene {
       curveSegments: 24,
     });
     geo.rotateX(-Math.PI / 2);
-    this.mesh(geo, office ? 0xf2d795 : green, 0, -10, 0).castShadow = false;
+    this.mesh(
+      geo,
+      office ? 0xd8dfce : l.forest ? 0x699d66 : green,
+      0,
+      -10,
+      0,
+    ).castShadow = false;
     // Colour patches are flush with the surface, never extra collision geometry.
-    for (let i = 0; i < 7; i++) {
-      const x = -390 + i * 120;
-      const hz = l.hole.y - 280;
-      for (const [a, b] of [
-        [-250, hz - 23],
-        [hz + 23, 250],
-      ]) {
-        if (b > a) {
-          const patch = this.box(
-            58,
-            0.12,
-            b - a,
-            office ? 0xefd18b : 0x8bce65,
-            x,
-            0.08,
-            (a + b) / 2,
-          );
-          patch.castShadow = false;
+    if (!office && !l.forest)
+      for (let i = 0; i < 7; i++) {
+        const x = -390 + i * 120;
+        const hz = l.hole.y - 280;
+        for (const [a, b] of [
+          [-250, hz - 23],
+          [hz + 23, 250],
+        ]) {
+          if (b > a) {
+            const patch = this.box(
+              58,
+              0.12,
+              b - a,
+              office ? 0xefd18b : 0x8bce65,
+              x,
+              0.08,
+              (a + b) / 2,
+            );
+            patch.castShadow = false;
+          }
         }
       }
-    }
     // Do not let decorative stripes cover the actual hole.
     const well = this.mesh(
       new T.CylinderGeometry(16.8, 16.8, 10, 32, 1, true),
@@ -299,9 +309,9 @@ export class GolfScene {
         3,
       );
     }
-    for (const o of l.obstacles) this.obstacle(o, office);
-    if (office) this.officeDecor();
-    else this.garden();
+    this.course = new CourseModels(this, l);
+    this.colliders = this.course.rects;
+    if (!office && !l.forest) this.garden();
     this.flag = new T.Group();
     this.flag.position.copy(world(l.hole.x + 19, l.hole.y, 0));
     this.root.add(this.flag);
@@ -352,62 +362,6 @@ export class GolfScene {
     this.updateBall(createBall(l), 0);
     this.resize();
   }
-  private obstacle(o: Rect, office: boolean) {
-    const x = o.x + o.w / 2 - 450,
-      z = o.y + o.h / 2 - 280;
-    let body: T.Mesh;
-    this.contact(x, z, o.w + 36, o.h + 36);
-    if (!office) {
-      body = this.box(o.w, 68, o.h, 0xe7b16b, x, 34, z);
-      this.box(o.w, 8, o.h, 0xffd493, x, 72, z);
-      for (let y = o.y + 18; y < o.y + o.h; y += 44) {
-        this.box(o.w + 0.2, 2, 2, 0xb78351, x, 35, y - 280);
-      }
-      this.label("↗", x, 77, z, 35, 35, "#885b37");
-    } else if (o.model === "notebook") {
-      body = this.box(o.w, 30, o.h, 0xee8967, x, 15, z);
-      this.box(o.w - 5, 19, o.h - 9, 0xfff2ce, x + 1, 15, z);
-      this.box(o.w, 5, o.h, 0xf29a70, x, 30, z);
-      this.box(9, 32, o.h, 0xce684c, o.x + 4.5 - 450, 16, z);
-      this.label("IDEAS", x + 3, 33, z, 78, 23);
-      for (let i = 0; i < 3; i++)
-        this.box(o.w - 6, 0.7, o.h - 10, 0xd8c49f, x + 2, 10 + i * 5, z);
-    } else if (o.model === "pencil") {
-      // The full rectangular wood carrier is the physical footprint, the hex barrel sits inside it.
-      body = this.box(o.w, 5, o.h, 0xe6b74f, x, 2.5, z);
-      const barrel = this.mesh(
-        new T.CylinderGeometry(11, 11, o.w - 36, 6),
-        0xffd65d,
-        x - 2,
-        11,
-        z,
-      );
-      barrel.rotation.z = Math.PI / 2;
-      const tip = this.mesh(
-        new T.ConeGeometry(11, 24, 6),
-        0xd6a777,
-        o.x + 12 - 450,
-        11,
-        z,
-      );
-      tip.rotation.z = Math.PI / 2;
-      const lead = this.mesh(
-        new T.ConeGeometry(4, 8, 6),
-        0x405453,
-        o.x + 4 - 450,
-        11,
-        z,
-      );
-      lead.rotation.z = Math.PI / 2;
-      this.box(18, 22, o.h, 0xf2989a, o.x + o.w - 9 - 450, 11, z, 3);
-    } else {
-      body = this.box(o.w, 24, o.h, 0xc4afe0, x, 12, z, 4);
-      this.box(o.w, 3, o.h, 0xb1a0d1, x, 1.5, z);
-      this.label("ERASE", x, 25, z, 70, 18, "#6c5a84");
-    }
-    body.userData.collider = { ...o };
-    this.colliders.push({ rect: o, mesh: body });
-  }
   private garden() {
     // Tiny trees are confined to the solid 28-unit border outside the playable area.
     for (const [x, z, scale] of [
@@ -446,39 +400,11 @@ export class GolfScene {
       );
     }
   }
-  private officeDecor() {
-    // All non-collision props are on the decorative shelf beyond the north wall.
-    this.box(330, 12, 105, 0xbe8e63, 80, -3, -340, 6);
-    this.box(68, 2, 60, 0xffe776, -35, 5, -340, 3);
-    this.label("TO DO", -35, 7, -340, 52, 17, "#946d43");
-    const cup = this.mesh(
-      new T.CylinderGeometry(24, 20, 44, 12),
-      0xe9f1dc,
-      98,
-      26,
-      -340,
-    );
-    cup.castShadow = true;
-    this.mesh(new T.CylinderGeometry(20, 20, 2, 16), 0x6c4736, 98, 49, -340);
-    const handle = this.mesh(
-      new T.TorusGeometry(13, 4, 6, 12),
-      cream,
-      127,
-      29,
-      -340,
-    );
-    handle.rotation.y = Math.PI / 2;
-    const clip = new T.Mesh(
-      new T.TorusGeometry(10, 1.5, 5, 16),
-      this.material(0x69a3a4),
-    );
-    clip.rotation.x = -Math.PI / 2;
-    clip.scale.set(0.6, 1, 2);
-    clip.position.set(195, 6, -335);
-    this.root.add(clip);
+  courseSnapshot() {
+    return this.course?.snapshot();
   }
   collisionBounds() {
-    return this.colliders.map(({ rect, mesh }) => {
+    const rects = this.colliders.map(({ rect, mesh }) => {
       const b = new T.Box3().setFromObject(mesh);
       return {
         rect,
@@ -490,6 +416,18 @@ export class GolfScene {
         },
       };
     });
+    const circles = (this.course?.circles || []).map(({ circle, mesh }) => {
+      const b = new T.Box3().setFromObject(mesh);
+      return {
+        circle,
+        bounds: {
+          x: (b.min.x + b.max.x) / 2 + 450,
+          y: (b.min.z + b.max.z) / 2 + 280,
+          r: (b.max.x - b.min.x) / 2,
+        },
+      };
+    });
+    return { rects, circles, actor: this.course?.actorBounds() };
   }
   resize() {
     const r = this.canvas.parentElement!.getBoundingClientRect();
@@ -506,7 +444,7 @@ export class GolfScene {
       minY = Infinity,
       maxY = -Infinity;
     for (const x of [-490, 490])
-      for (const y of [-90, 135])
+      for (const y of [-90, 175])
         for (const z of [-405, 310]) {
           const p = new T.Vector3(x, y, z).applyMatrix4(
             this.camera.matrixWorldInverse,
@@ -550,6 +488,7 @@ export class GolfScene {
     };
   }
   updateBall(b: Ball, dt: number) {
+    this.course?.update(b);
     if (this.capture) {
       const c = this.capture;
       c.t += dt;
@@ -609,7 +548,7 @@ export class GolfScene {
     );
     this.aim.add(arrow);
     // Short prediction uses the exact physics, at most .26 seconds; never a full route.
-    const predicted = { ...b };
+    const predicted = { ...b, hits: [...b.hits] };
     shoot(predicted, dx, dy);
     for (let n = 0; n < 64 && predicted.state === "moving"; n++) {
       step(predicted, this.level, STEP);
@@ -647,10 +586,12 @@ export class GolfScene {
       );
     }
   }
-  bump() {
+  bump(_surface?: string, id?: string) {
     this.impact = 0.15;
+    if (id) this.course?.hit(id);
   }
   render(t: number, dt: number, _menu: boolean) {
+    this.course?.animate(dt);
     if (this.flagMesh) {
       this.flagMesh.rotation.y = Math.sin(t * 2) * 0.14;
       this.flagMesh.rotation.z = Math.sin(t * 1.8) * 0.035;

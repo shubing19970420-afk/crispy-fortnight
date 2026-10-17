@@ -34,9 +34,14 @@ function boot() {
     tutorialSeen = false;
   const sound = new Sound();
   let completed: number[] = [];
+  let best: Record<string, number> = {};
+  try {
+    best = JSON.parse(localStorage.getItem("golf-best-v4") || "{}");
+    if (!best || typeof best !== "object") best = {};
+  } catch {}
   try {
     const saved: unknown = JSON.parse(
-      localStorage.getItem("golf-progress") || "[]",
+      localStorage.getItem("golf-progress-v4") || "[]",
     );
     if (Array.isArray(saved))
       completed = saved.filter((i) => Number.isInteger(i) && i >= 0 && i < 3);
@@ -99,9 +104,9 @@ function boot() {
     el("title").textContent = levels[i].name;
     el("subtitle").textContent = `第 0${i + 1} 关 / 微缩世界`;
     el("hint").textContent = [
-      "瞄准旗帜 · 松手击球",
-      "借上方墙壁反弹",
-      "穿过文具间的空隙",
+      "箭头指向出球方向",
+      "北侧缺口 → 南侧缺口",
+      "注意同事经过 · 桌底可穿行",
     ][i];
     el("tutorial").hidden = tutorialSeen;
     view.setLevel(i);
@@ -129,7 +134,11 @@ function boot() {
       ball.state === "ready"
         ? drag
           ? "向后蓄力 · 松手出发！"
-          : "按住白球，向后拖拽"
+          : index === 2
+            ? "观察同事 · 拖拽出发"
+            : index === 1
+              ? "北缺口 → 南缺口 · 一杆折返"
+              : "按住白球向后拉 · 松手击球"
         : ball.state === "moving"
           ? "滚动中… 看它的！"
           : ball.state === "won"
@@ -147,11 +156,23 @@ function boot() {
         ? "三个小世界，全部征服！"
         : "漂亮！下一个小世界等着你。"
       : "换个角度，或轻轻调整力度。";
+    if (won) {
+      const seconds = ball.time - ball.shotAt,
+        key = String(index);
+      if (!Number.isFinite(best[key]) || seconds < best[key]) {
+        best[key] = seconds;
+        try {
+          localStorage.setItem("golf-best-v4", JSON.stringify(best));
+        } catch {}
+      }
+      el("result-text").textContent =
+        `${index === 2 ? "三关完成！ " : ""}滚动 ${seconds.toFixed(2)} 秒 · 反弹 ${ball.bounces} 次 · 最佳 ${best[key].toFixed(2)} 秒`;
+    }
     el("next").hidden = !won || index === 2;
     if (won && !completed.includes(index)) {
       completed.push(index);
       try {
-        localStorage.setItem("golf-progress", JSON.stringify(completed));
+        localStorage.setItem("golf-progress-v4", JSON.stringify(completed));
       } catch {}
     }
     update();
@@ -289,6 +310,11 @@ function boot() {
   });
   canvas.addEventListener("webglcontextrestored", () => location.reload());
   function frame(t: number) {
+    if (document.hidden) {
+      last = t;
+      requestAnimationFrame(frame);
+      return;
+    }
     const dt = Math.min(Math.max((t - last) / 1000, 0), 0.05);
     last = t;
     if (screen === "menu" && view.map) {
@@ -306,15 +332,18 @@ function boot() {
       if (destination !== null) start(destination);
     }
     if (screen === "game") {
-      if (ball.state === "moving") {
+      if (ball.state === "moving" || ball.state === "ready") {
         acc += dt;
         const bounces = ball.bounces;
-        while (acc >= STEP && ball.state === "moving") {
+        while (
+          acc >= STEP &&
+          (ball.state === "moving" || ball.state === "ready")
+        ) {
           step(ball, levels[index]);
           acc -= STEP;
         }
         if (ball.bounces > bounces) {
-          view.bump();
+          view.bump(ball.surface, ball.lastCollider);
           sound.play(
             ball.surface || "wood",
             Math.min(Math.hypot(ball.vx, ball.vy) / 400, 1),
@@ -350,7 +379,7 @@ function boot() {
       value: {
         project: (x: number, y: number, h = 9) => view.project(x, y, h),
         unproject: (x: number, y: number) => view.planePoint(x, y, 9),
-        state: () => ({ ...ball }),
+        state: () => ({ ...ball, hits: [...ball.hits] }),
         menu: () => view.map?.snapshot(),
         island: (i: number) => view.map?.anchor(i),
         pick: (x: number, y: number) => view.map?.pick(x, y),
@@ -362,6 +391,7 @@ function boot() {
           aim: view.aim.children.length,
         }),
         colliders: () => view.collisionBounds(),
+        course: () => view.courseSnapshot(),
         renderer: () => ({
           calls: view.renderer.info.render.calls,
           triangles: view.renderer.info.render.triangles,
