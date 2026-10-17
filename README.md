@@ -208,3 +208,27 @@ npm run preview
 实际截图：`docs/screenshots/ui-kit-menu-{desktop,mobile,small}.png`、`ui-kit-level1-*.png`、`ui-kit-level3-*.png`。`ui-kit-records.png` 是测试存档（非用户实际成绩）的奖牌边界展示，其余关卡截图为真实浏览器操作。首页另提供实际完成第一关后的截图，以验证金星确实来自真实通关。
 
 另修复了选关过场中焦点跟随按钮而使隐藏容器横向滚动的问题：`#app` 使用不可滚动的裁切，真实通关返回首页后再切换桌面／手机也保持 `scrollLeft=0`。不改变相机或场景位置；浏览器测试包含该复现流程。
+
+## 浏览器试玩与 GitHub Pages 自动发布
+
+项目为纯静态 Vite 游戏，无后端。开发分支 `game/one-shot-golf-prototype` 每次 push 会运行 `.github/workflows/deploy-pages.yml`：安装锁定依赖、物理测试、生产构建、项目子路径浏览器检查、Pages 发布及真实线上浏览器检查。工作流只发布该开发分支，不合并 main。并发构建自动取消旧任务，保持最新版本。
+
+默认项目地址（首次成功发布后生效）：https://shubing19970420-afk.github.io/crispy-fortnight/ 。以 GitHub Actions 的部署输出及 Settings → Pages 显示的地址为准，不能用此预期地址证明已经上线。
+
+### 仓库首次启用（仅一次）
+
+1. 打开 https://github.com/shubing19970420-afk/crispy-fortnight/settings/pages ，在 **Build and deployment → Source** 选择 **GitHub Actions**。
+2. 打开 https://github.com/shubing19970420-afk/crispy-fortnight/actions ，找到 **Deploy golf to GitHub Pages** 的最新运行。若首次运行因 Pages 未启用而失败，设置完成后选择 **Re-run all jobs**；以后 push 自动部署。无需将工作流合并 main。
+3. 如已有 `github-pages` 环境限制只允许 main 发布，在 Settings → Environments → github-pages 的允许部署分支中添加 `game/one-shot-golf-prototype`。仅在 Actions 明确报告该限制时需要此操作。
+4. 成功运行的 Summary 会给出试玩地址；`pages-browser-checks` 附件包含构建／线上测试报告及实际截图。只有发布后的检查也成功，才表示线上 Logo、字体、三关与真实路线模块均通过检查。
+
+首次站点创建是仓库管理操作：`actions/configure-pages@v5` 的官方 `enablement` 说明要求不同于默认 `GITHUB_TOKEN` 的管理令牌，因此工作流不假装用默认令牌自动创建站点，也不要求把个人令牌贴到代码或聊天。使用上面的仓库设置即可。当前 Codex 环境访问 `api.github.com` 和目标 `github.io` 返回 403，无法读取／修改 Pages 配置或确认线上部署结果；Git 推送权限不等于 Pages 管理权限。
+
+### 路径和验证
+
+`vite.config.ts` 的 `base: './'` 使 JS、CSS、字体、Logo、favicon 与 Worker 自动使用相对路径，兼容项目子目录和本地启动；不需要修改字体注册、HTML、场景或游戏逻辑。Vite 构建会把 `/fonts/...` 重写为正确的部署相对路径。
+
+- `npm run build`，然后 `CHROMIUM_PATH=/usr/bin/chromium node tests/pages.mjs`：在本地仅挂载 `/crispy-fortnight/` 的静态服务器检查生产包。
+- 其他环境先 `npx playwright install --with-deps chromium`，再 `node tests/pages.mjs`；不需要设置 `CHROMIUM_PATH`。
+- `PAGES_URL=https://实际试玩地址/ node tests/pages.mjs`：相同检查针对线上站点，包含初次发布传播重试、实际字体解码、原 Logo、WebGL、三关进入／重试／返回、移动端及真实路线 Worker。线上测试不依赖 DEV 调试接口。
+- 结果与截图在忽略提交的 `test-results/pages/{built,published}/`。没有 Service Worker 缓存；Vite 带散列的文件名让新版本资源自动更新，遇到浏览器旧页面可刷新。

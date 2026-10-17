@@ -1,0 +1,68 @@
+name: Deploy golf to GitHub Pages
+
+on:
+  push:
+    branches: [game/one-shot-golf-prototype]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: golf-github-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/game/one-shot-golf-prototype'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Validate deterministic game physics
+        run: npm test
+      - name: Build static game
+        run: npm run build
+      - name: Install browser for production checks
+        run: npx playwright install --with-deps chromium
+      - name: Verify game under the Pages project prefix
+        run: node tests/pages.mjs
+      # First-time repository setting: Settings > Pages > Source = GitHub Actions.
+      # Default GITHUB_TOKEN can deploy but cannot administratively create a site.
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload static game
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - name: Publish game
+        id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Verify the published game
+        env:
+          PAGES_URL: ${{ steps.deployment.outputs.page_url }}
+        run: node tests/pages.mjs
+      - name: Keep actual browser screenshots and validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pages-browser-checks
+          path: test-results/pages/
+          if-no-files-found: ignore
+      - name: Show play link
+        if: success()
+        env:
+          PLAY_URL: ${{ steps.deployment.outputs.page_url }}
+        run: echo "Play the verified game at ${PLAY_URL}" >> "$GITHUB_STEP_SUMMARY"
