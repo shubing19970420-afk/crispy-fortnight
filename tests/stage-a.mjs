@@ -8,13 +8,13 @@ try {
  await fs.mkdir('docs/screenshots',{recursive:true});
  for(let i=0;i<3;i++){
   const sign=page.locator(`[data-level="${i}"]`);
-  assert.equal(await sign.locator('.difficulty svg').count(),i+1);
-  assert.equal(await sign.locator('.difficulty').getAttribute('aria-label'),`难度 ${i+1} 星`);
+  assert.equal(await sign.locator('.medal-star').count(),3);
+  assert.equal((await sign.locator('.medal-rack').getAttribute('aria-label')).includes('通关评价 0 星'),true);
   assert.equal(await sign.locator('.level-number').textContent(),`0${i+1}`);
  }
  await page.evaluate(()=>localStorage.setItem('golf-progress-v4','[0,1,2]'));await page.reload();await page.waitForFunction(()=>window.golfDebug?.menu());await page.evaluate(()=>document.fonts.ready);
- assert.deepEqual(await page.locator('.difficulty').evaluateAll(a=>a.map(e=>e.querySelectorAll('svg').length)),[1,2,3]);
- assert.deepEqual(await page.locator('.progress').allTextContents(),['✓','✓','✓']);
+ assert.deepEqual(await page.locator('.medal-rack').evaluateAll(a=>a.map(e=>e.querySelectorAll('.earned').length)),[1,1,1]);
+ assert.deepEqual(await page.locator('.progress').allTextContents(),['','','']);
  assert.equal(await page.locator('#menu-assist').isVisible(),false);
  await page.evaluate(()=>localStorage.setItem('golf-progress-v4','[]'));await page.reload();await page.waitForFunction(()=>window.golfDebug?.menu());await page.evaluate(()=>document.fonts.ready);
  for(const [width,height,name] of [[1440,960,'desktop'],[390,844,'mobile'],[320,640,'small'],[844,390,'landscape']]){
@@ -44,5 +44,5 @@ try {
   await page.locator('#home').click();await page.waitForFunction(()=>window.golfDebug.menu());
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${name} no horizontal overflow`);
  }
- assert.deepEqual(errors,[]);console.log('PASS stage A: fixed difficulty stars independent of completion, number chips, 4 viewports, HUD separation, sound toggle, real drag/power pointer, retry/home and actual screenshots');
+ assert.deepEqual(errors,[]);console.log('PASS stage A: record-derived medals with legacy progress fallback, number chips, 4 viewports, HUD separation, sound toggle, real drag/power pointer, retry/home and actual screenshots');
 }finally{await browser.close();}

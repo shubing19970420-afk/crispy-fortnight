@@ -1,0 +1,93 @@
+/* Opt-in first-stage kit. B settings/route props and C ribbons keep their skins. */
+.plaque-art { filter: drop-shadow(var(--ui-contact)); }
+.plaque-side { fill: var(--ui-wood-side); }
+.plaque-bevel { fill: var(--ui-wood-bevel); }
+.plaque-front { fill: var(--ui-wood-front); }
+.plaque-upper { fill: var(--ui-wood-upper); }
+.plaque-highlight { fill: none; stroke: var(--ui-wood-light); stroke-width: 3; }
+.plaque-seam { stroke: var(--ui-wood-grain); stroke-width: 2; }
+.plaque-seam-light { stroke: var(--ui-wood-edge); stroke-width: 2; }
+.plaque-grain { fill: none; stroke: var(--ui-wood-grain); stroke-width: 1.5; opacity: .3; }
+.plaque-pegs { fill: var(--ui-wood-grain); stroke: var(--ui-wood-light); stroke-width: 1; }
+#map-labels .map-label { padding: 15px 24px 18px; min-width: 196px; min-height: 103px; color: var(--ui-ink); }
+#map-labels .map-label strong { font: var(--ui-weight) var(--ui-title-size)/1.3 var(--ui-font-title); color: var(--ui-ink); text-shadow: 0 1px var(--ui-wood-edge); }
+#map-labels .plank-hangers, #map-labels .plank-hangers::after { background: var(--ui-wood-bevel); border-left-color: var(--ui-wood-edge); box-shadow: 2px 2px var(--ui-wood-side); }
+#map-labels .level-number { top: -10px; left: -7px; background: var(--ui-wood-front); color: var(--ui-ink); border: 2px solid var(--ui-wood-edge); border-radius: 4px 7px 3px 5px; box-shadow: inset 1px 2px var(--ui-wood-light), 1px 4px var(--ui-wood-side), var(--ui-small-contact); text-shadow: 0 1px var(--ui-wood-edge); }
+.medal-rack { position: relative; display: flex; isolation: isolate; width: 122px; height: 40px; margin: 5px auto 0; justify-content: center; align-items: center; gap: 4px; padding: 2px 9px 6px; }
+.rack-base { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; filter: drop-shadow(var(--ui-small-contact)); }
+.medal-star { width: 28px; height: 30px; flex: none; --star-face: var(--ui-star-empty); --star-side: var(--ui-star-empty-side); --star-light: var(--ui-star-empty-light); --star-bevel: var(--ui-star-empty-side); }
+.medal-star.earned { --star-face: var(--ui-star); --star-side: var(--ui-star-side); --star-light: var(--ui-star-light); --star-bevel: var(--ui-star-bevel); filter: drop-shadow(0 2px 1px var(--ui-star-side)); }
+.star-face { fill: var(--star-face); }
+.star-side { fill: var(--star-side); }
+.star-light { fill: var(--star-light); }
+.star-bevel { fill: var(--star-bevel); }
+.star-glint { fill: none; stroke: var(--star-light); stroke-width: 2; stroke-linecap: round; }
+#map-labels .map-label .progress { display: none; }
+/* Separate cap and stationary base: pressing the cap reveals less extrusion. */
+header .icon.prop-button, #start.wood-sign.prop-button, #game .controls > #retry.prop-button {
+  --button-front: var(--ui-cream); --button-base: var(--ui-cream-base); --button-top: var(--ui-cream-light); --button-bevel: var(--ui-cream-bevel);
+  position: relative; isolation: isolate; padding: 0; border: 0; border-radius: var(--ui-radius); background: var(--button-base); color: var(--ui-ink); box-shadow: 0 var(--ui-depth) 0 var(--button-base), var(--ui-contact); transition: none; text-shadow: none;
+}
+#start.wood-sign.prop-button { position: absolute; min-width: 226px; height: 72px; min-height: 72px; display: block; transform: rotate(-4deg); }
+.prop-face { display: flex; align-items: center; justify-content: center; gap: var(--ui-gap); width: 100%; height: 100%; padding: 12px 20px; border-radius: inherit; border: 2px solid var(--button-top); background: var(--button-front); box-shadow: inset 2px 3px 0 var(--button-top), inset -3px -4px 0 var(--button-bevel); color: inherit; transition: transform var(--ui-motion-return) var(--ui-ease), box-shadow var(--ui-motion-press); }
+.prop-button .solid-prop-icon { width: 30px; height: 30px; flex: none; filter: drop-shadow(0 1px var(--button-top)); pointer-events: none; }
+#start.wood-sign strong { font: var(--ui-weight) var(--ui-button-size)/1.25 var(--ui-font-title); }
+#start.wood-sign span { margin-left: 0; }
+header .icon.prop-button { width: 64px; height: 64px; display: block; }
+header .icon.prop-button .prop-face { padding: 10px; }
+header .icon.prop-button.muted { --button-front: var(--ui-cream-bevel); color: var(--ui-wood-side); }
+header .icon.prop-button:hover, header .icon.prop-button:active { transform: none; }
+#start.wood-sign.prop-button:hover, #start.wood-sign.prop-button:active { transform: rotate(-4deg); }
+.prop-button:hover > .prop-face { transform: translateY(-3px); }
+.prop-button:active > .prop-face { transform: translateY(var(--ui-press)) scale(.98,.95); box-shadow: inset 1px 2px 3px var(--button-bevel); transition-duration: var(--ui-motion-press); }
+#game .controls > #retry.prop-button { --button-front: var(--ui-coral); --button-base: var(--ui-coral-base); --button-top: var(--ui-coral-light); --button-bevel: var(--ui-coral-base); height: 60px; min-height: 60px; min-width: 152px; transform: none; }
+#game .controls > #retry.prop-button .prop-face { font: var(--ui-weight) var(--ui-button-size)/1.25 var(--ui-font-title); }
+#game .controls { gap: var(--ui-gap); justify-content: flex-end; }
+.level-title { display: flex; align-items: center; gap: var(--ui-gap); padding: 16px 23px 23px; min-height: 77px; color: var(--ui-ink); }
+.level-title > span { display: grid; place-items: center; flex: none; width: 39px; height: 37px; padding: 0; background: var(--ui-wood-front); border: 2px solid var(--ui-wood-edge); border-radius: 4px 6px 3px 4px; box-shadow: inset 1px 2px var(--ui-wood-light), 0 3px var(--ui-wood-side); font: var(--ui-weight) 21px/1 var(--ui-font-title); color: var(--ui-ink); }
+.level-title h2 { margin: 0; font-size: var(--ui-title-size); color: var(--ui-ink); text-shadow: 0 1px var(--ui-wood-edge); }
+#status, #shot, #percent { color: var(--ui-ink); }
+/* Actual individual blocks with a recessed seat, not a painted continuous strip. */
+.meter { border-color: var(--ui-cream); background: var(--ui-wood-bevel); box-shadow: inset 1px 3px 3px var(--ui-wood-side), 0 3px var(--ui-cream-bevel), 1px var(--ui-depth) var(--ui-cream-base), var(--ui-contact); }
+.meter-ticks { display: flex; gap: 3px; padding: 2px; inset: 1px; border-radius: 17px; background: none; box-shadow: none; overflow: hidden; }
+.meter-ticks::after { display: none; }
+.power-segment { flex: 1; background: var(--segment); border-radius: 2px; box-shadow: inset 0 2px 0 var(--ui-cream-bevel), inset 0 -2px 0 rgb(56 77 67 / .14); }
+.power-ball { background: radial-gradient(circle at 30% 24%,var(--ui-white) 0 35%,var(--ui-cream-light) 50%,var(--ui-ball-shade) 100%); border-color: var(--ui-white); box-shadow: inset 1px 2px var(--ui-white), var(--ui-small-contact); }
+.power-ball::after { background: radial-gradient(circle,var(--ui-ball-dimple) 0 1px,transparent 2px) 0 0/6px 6px; }
+@media(max-width:650px) {
+  #map-labels .map-label { min-width: 166px; min-height: 91px; padding: 12px 17px 17px; }
+  #map-labels .map-label strong { font-size: 21px; }
+  .medal-rack { width: 108px; height: 34px; margin-top: 4px; padding-bottom: 5px; gap: 3px; }
+  .medal-star { width: 25px; height: 27px; }
+  #start.wood-sign.prop-button { min-width: 188px; height: 64px; min-height: 64px; }
+  #start.wood-sign strong { font-size: 19px; }
+  .prop-face { padding: 9px 15px; gap: 9px; }
+  header .icon.prop-button { width: 48px; height: 48px; }
+  header .icon.prop-button .prop-face { padding: 8px; }
+  header .icon.prop-button .solid-prop-icon { width: 26px; height: 26px; }
+  .level-title { display: block; padding: 8px 14px 15px; min-height: 76px; }
+  .level-title > span { width: 26px; height: 22px; font-size: 14px; margin-bottom: 5px; }
+  .level-title h2 { font-size: 22px; }
+  #game .controls > #retry.prop-button { flex: 0 1 180px; width: 180px; min-height: 54px; height: 54px; }
+  #game .controls > #retry.prop-button .prop-face { font-size: 19px; }
+}
+@media(max-width:370px) {
+  header .icon.prop-button { width: 44px; }
+  .level-title { padding-left: 10px; padding-right: 10px; }
+  .level-title h2 { font-size: 16px; }
+  #start.wood-sign.prop-button { min-width: 170px; }
+}
+@media(max-height:530px) and (min-width:651px) {
+  #map-labels .map-label { min-height: 76px; padding: 9px 19px 15px; }
+  #map-labels .map-label strong { font-size: 20px; }
+  .medal-rack { height: 30px; width: 106px; margin-top: 3px; }
+  .medal-star { width: 23px; height: 25px; }
+  #start.wood-sign.prop-button { height: 60px; min-height: 60px; min-width: 196px; }
+  .level-title { min-height: 68px; padding: 12px 22px 20px; }
+  .level-title h2 { font-size: 21px; }
+}
+@media(prefers-reduced-motion:reduce) { .prop-face { transition: none; } }
+/* The legacy wooden start skin used !important to suppress its rectangular shadow. */
+#start.wood-sign.prop-button { box-shadow: 0 var(--ui-depth) 0 var(--button-base), var(--ui-contact) !important; }
+/* Moving focused map buttons must not auto-scroll the hidden application viewport. */
+#app { overflow: clip; }

@@ -29,7 +29,7 @@ try {
  await page.evaluate(()=>localStorage.setItem('golf-best-v4','{"0":99}'));await page.reload();await page.waitForFunction(()=>window.golfDebug?.menu());await enter(0);await shot(65,0);await page.locator('#result').waitFor({state:'visible',timeout:40000});
  assert.equal(await page.locator('#result-label').textContent(),'NEW RECORD！新纪录！');
  assert.ok(await page.locator('#result').evaluate(e=>e.classList.contains('new-record')));
- await page.locator('#result-menu').click();await enter(2);
+ await page.locator('#result-menu').click();assert.equal(await page.locator('[data-level="0"] .medal-star.earned').count(),3,'actual saved victory updates menu medals');await enter(2);
  for(let n=0;n<3;n++){await shot(7,0);await page.locator('#result').waitFor({state:'visible',timeout:40000});if(n===2){assert.equal(await page.locator('#result-route-offer').isVisible(),true);assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('golf-failures'))[2]),3);await page.locator('#result-route').click();}else await page.locator('#retry-result').click();}
  await openHints();await page.waitForFunction(()=>window.golfDebug.hint(),{},{timeout:40000});
  await toggleHints();

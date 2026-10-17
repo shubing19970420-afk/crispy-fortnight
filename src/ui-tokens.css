@@ -1,0 +1,52 @@
+/* Opt-in UI kit. These values never recolour scene materials or legacy B/C props. */
+:root {
+  --ui-fog: #b9d9d1;
+  --ui-grass: #a9d578;
+  --ui-cream: #f7e5b4;
+  --ui-cream-light: #fff7df;
+  --ui-cream-bevel: #e8d4a0;
+  --ui-cream-base: #b9a278;
+  --ui-wood-front: #d6a16b;
+  --ui-wood-upper: #e1b381;
+  --ui-wood-side: #8e5d3c;
+  --ui-wood-bevel: #b98254;
+  --ui-wood-edge: #edc896;
+  --ui-wood-light: #f6d8a8;
+  --ui-wood-grain: #a87449;
+  --ui-star: #f8c64e;
+  --ui-star-light: #ffedb0;
+  --ui-star-bevel: #dda43a;
+  --ui-star-side: #ad7a34;
+  --ui-star-empty: #b2a385;
+  --ui-star-empty-light: #c9b99a;
+  --ui-star-empty-side: #89775c;
+  --ui-coral: #e97b53;
+  --ui-coral-light: #ffbd8d;
+  --ui-coral-base: #a7593c;
+  --ui-ink: #384d43;
+  --ui-white: #fffdf0;
+  --ui-ball-shade: #d4d4ba;
+  --ui-ball-dimple: #aeb59c;
+  --ui-meter-0: #79a968; --ui-meter-1: #8cb66f;
+  --ui-meter-2: #a0c476; --ui-meter-3: #b8ce7c;
+  --ui-meter-4: #d6d580; --ui-meter-5: #edda80;
+  --ui-meter-6: #f3cd73; --ui-meter-7: #edb364;
+  --ui-meter-8: #e69a5a; --ui-meter-9: #cf8250;
+  --ui-contact: 4px 10px 10px rgb(56 77 67 / .2);
+  --ui-small-contact: 2px 4px 3px rgb(56 77 67 / .22);
+  --ui-face-highlight: inset 2px 3px 0 var(--ui-cream-light);
+  --ui-face-bevel: inset -3px -4px 0 var(--ui-cream-bevel);
+  --ui-depth: 8px;
+  --ui-press: 5px;
+  --ui-radius: 20px 24px 18px 22px;
+  --ui-gap: 12px;
+  --ui-font-title: var(--font-title);
+  --ui-font-body: var(--font-body);
+  --ui-weight: 400; /* Both installed faces are real static Regular fonts. */
+  --ui-title-size: 24px;
+  --ui-button-size: 22px;
+  --ui-body-size: 16px;
+  --ui-motion-press: 110ms;
+  --ui-motion-return: 260ms;
+  --ui-ease: cubic-bezier(.2,1.5,.4,1);
+}
