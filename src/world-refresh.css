@@ -1,0 +1,70 @@
+/* Quiet landscape; interactive dioramas are still rendered by the shared WebGL scene. */
+.menu-landscape{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+body.playing .menu-landscape{display:none}
+body:not(.playing) #viewport{inset:155px 20px 32px}
+#menu .logo.has-official-logo{top:18px;left:26px;width:300px}
+#menu .logo-english{font-size:15px;letter-spacing:.19em;margin-top:-4px}
+/* Actual regular/bold reading faces; no scaleX, condensed metrics or oblique face. */
+#shot,#status,#hint,#tutorial strong,#settings .setting-row strong,#instructions,#instructions-toggle,#route-help,#route-message,#result-label,#result-text,#result-stats,#result-route-offer,#percent,header .icon-label,#map-labels .progress{font-family:var(--font-body);font-style:normal;font-stretch:normal;letter-spacing:0;font-weight:400}
+#shot{font-size:13px}#status{font-size:15px}#hint{font-size:13px}#percent{font-size:20px;font-weight:700}
+#settings .setting-row strong{font-size:21px;font-weight:700}#instructions{font-size:15px;line-height:1.85}#instructions-toggle{font-size:16px}
+#route-help,#route-message{font-size:14px;line-height:1.6}#result-stats small{font-size:13px}#result-stats strong{font-size:26px;font-weight:700;line-height:1.5}#result-label{font-size:18px;font-weight:700}
+#result:not(.victory) .resultbox{padding:26px 30px 30px;min-height:310px;display:flex;flex-direction:column;justify-content:space-between;align-items:center}
+#result:not(.victory) .failure-scene{width:150px;height:74px;margin:0 auto 14px;flex:none}
+#result:not(.victory) .failure-ball{width:32px;height:32px;left:26px;bottom:12px}
+#result:not(.victory) .failure-hole{width:56px;height:20px;bottom:5px;right:10px;border-width:5px}
+#result:not(.victory) .failure-flag{height:55px;right:33px;bottom:17px}
+#result:not(.victory) .failure-flag:after{width:30px;height:21px}
+#result:not(.victory) #result-label:empty{display:none}
+#result:not(.victory) #result-title{font-size:36px;line-height:1.3;margin:4px 0 30px;transform:none}
+#result:not(.victory) .result-actions{width:100%;margin-top:auto}
+@media(max-width:649px){
+  body:not(.playing) #viewport{inset:140px 10px 25px}
+  #menu .logo.has-official-logo{width:166px;left:16px;top:16px}
+  #menu .logo-english{font-size:12px;letter-spacing:.13em}
+  #map-labels .map-label{min-height:56px;padding:6px 10px 8px;--plank-y:1px;width:142px;min-width:142px}
+  #map-labels .map-label strong{font-size:16px}
+  #map-labels .medal-rack{height:23px;margin-top:1px;width:82px}
+  #map-labels .medal-star{height:20px;width:19px}
+  #map-labels .level-number{font-size:13px}
+  #result:not(.victory) .resultbox{min-height:290px;padding:24px 22px 26px}
+  #result:not(.victory) #result-title{font-size:32px;margin-bottom:26px}
+  #result-stats strong{font-size:22px}#percent{font-size:18px}
+}
+#canvas-surface{position:relative;width:100%;height:100%}
+#map-labels{position:absolute;inset:0;pointer-events:none;z-index:2}
+body.playing #map-labels{display:none}
+#map-labels.departing{opacity:0;transition:opacity .18s}
+#map-labels.departing .map-label{pointer-events:none}
+@media(max-width:649px){
+  body:not(.playing) #viewport{overflow-x:hidden;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#88b6a5 transparent;overscroll-behavior:contain}
+  body:not(.playing) #canvas-surface{height:1050px}
+  body:not(.playing) canvas{touch-action:pan-y}
+  #map-labels .map-label{touch-action:pan-y}
+}
+@media(min-width:651px) and (max-width:1100px){
+  #map-labels .map-label{width:144px;min-width:144px;min-height:68px;padding:8px 10px 10px}
+  #map-labels .map-label strong{font-size:17px}
+  #map-labels .medal-rack{width:90px;height:28px;margin-top:2px}
+  #map-labels .medal-star{width:21px;height:23px}
+  #map-labels .map-label.locked .progress{font-size:11px;left:9px;right:9px}
+}
+@media(max-height:530px) and (min-width:651px){
+  body:not(.playing) #viewport{inset:110px 10px 12px}
+  #menu .logo.has-official-logo{width:220px;top:12px;left:18px}
+  #menu .logo-english{font-size:12px}
+}
+@media(max-width:370px){#result-stats{gap:8px}#result-stats strong{font-size:19px}}
+/* Matches the sunlit sea plane, keeping the canvas edge invisible behind HUD. */
+body.sea-course,body.sea-course #app{background:#78c0b9}
+body.sea-course .cloud{display:none}
+.menu-landscape--portrait{display:none}
+@media(max-width:649px){.menu-landscape--wide{display:none}.menu-landscape--portrait{display:block}}
+@media(min-width:650px) and (max-width:800px){
+  #map-labels .map-label{width:110px;min-width:110px;min-height:58px;padding:6px 8px 8px}
+  #map-labels .map-label strong{font-size:14px}
+  #map-labels .medal-rack{width:78px;height:23px;margin-top:1px;gap:2px}
+  #map-labels .medal-star{width:18px;height:20px}
+  #map-labels .level-number{font-size:13px}
+  #map-labels .map-label.locked .progress{font-size:10px;left:5px;right:5px}
+}

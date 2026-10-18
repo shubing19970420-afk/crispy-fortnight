@@ -10,7 +10,7 @@ try {
   const c=document.createElement('canvas').getContext('2d'); c.font='25px "Maoken Assorted Sans"';const a=c.measureText('办公室高尔夫').width;c.font='25px "Title Loading Fallback"';const b=c.measureText('办公室高尔夫').width;
   return {loaded:[...document.fonts].filter(f=>f.status==='loaded').map(f=>f.family),title:getComputedStyle(document.querySelector('.map-label strong')).fontFamily,body:getComputedStyle(document.querySelector('#settings')).fontFamily,a,b};
  });
- assert.ok(fonts.loaded.includes('Maoken Assorted Sans'));assert.ok(fonts.loaded.includes('HuangYou'));assert.ok(fonts.title.includes('Maoken'));assert.ok(fonts.body.includes('HuangYou'));assert.ok(Math.abs(fonts.a-fonts.b)<2,'Chinese fallback widths match');
+ assert.ok(fonts.loaded.includes('Maoken Assorted Sans'));assert.ok(fonts.loaded.includes('HuangYou'));assert.ok(fonts.title.includes('Maoken'));assert.ok(fonts.body.includes('Golf UI Sans'));assert.ok(Math.abs(fonts.a-fonts.b)<2,'Chinese fallback widths match');
  for(const [width,height] of [[1440,960],[390,844],[320,640],[844,390]]){
   await page.setViewportSize({width,height});await page.waitForTimeout(350);
   assert.equal(await page.locator('.map-label').count(),5);

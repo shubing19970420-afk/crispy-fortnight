@@ -1,3 +1,4 @@
+import {palm} from "./diorama-art";
 import * as T from "three";
 import type { GolfScene } from "./scene";
 import type { Level, Rect, Circle, Surface } from "./levels";
@@ -218,7 +219,9 @@ export class CourseModels {
     const x = o.x - 450,
       z = o.y - 280;
     let body: T.Mesh;
-    if (o.model === "tree") {
+    if(o.model==="palm"){
+      body=palm(this.host,x,z,this.host.root);
+    } else if (o.model === "tree") {
       body = this.mesh(
         new T.CylinderGeometry(o.r, o.r, 48, 32),
         0x98714b,

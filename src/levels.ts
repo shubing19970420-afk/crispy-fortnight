@@ -15,7 +15,7 @@ export type Circle = {
   x: number;
   y: number;
   r: number;
-  model: "tree" | "rock" | "stump" | "chair";
+  model: "tree" | "rock" | "stump" | "chair" | "palm";
   surface: Surface;
 };
 export type Desk = { x: number; y: number; w: number; h: number };
@@ -26,7 +26,7 @@ export type Walker = {
   period: number;
   r: number;
 };
-export type Platform = {x:number;y:number;w:number;h:number};
+export type Platform = {x:number;y:number;w:number;h:number;outline?:{x:number;y:number}[]};
 export type Rotor = {x:number;y:number;length:number;width:number;arms:number;omega:number;phase:number};
 export type Portal = {x:number;y:number;angle:number;r:number};
 export type Level = {
@@ -218,8 +218,15 @@ export const levels: Level[] = [
   },
   {
     name: "不可能的一杆", subtitle: "05 / 换个方向，就有可能", hint: "蓝门入，橙门出；出口箭头决定新的方向。",
-    start:{x:110,y:280},hole:{x:650,y:430},obstacles:portalPosts,circles:[],
-    platforms:[{x:45,y:120,w:335,h:350},{x:540,y:65,w:315,h:440}],
+    start:{x:110,y:280},hole:{x:650,y:430},obstacles:portalPosts,circles:[
+      {id:"cliff-palm-0",x:28,y:250,r:6,model:"palm",surface:"wood"},
+      {id:"cliff-palm-1",x:820,y:80,r:6,model:"palm",surface:"wood"},
+      rock("shore-rock-0",340,475,8),rock("shore-rock-1",610,510,8),
+    ],
+    platforms:[
+      {x:45,y:120,w:335,h:350,outline:[[90,115],[250,98],[345,132],[398,205],[395,365],[340,475],[150,490],[36,430],[28,250]].map(([x,y])=>({x,y}))},
+      {x:540,y:65,w:315,h:440,outline:[[600,60],[730,45],[820,80],[868,160],[855,400],[790,515],[610,526],[522,400],[518,180]].map(([x,y])=>({x,y}))},
+    ],
     portals:portalPair,
   },
 ];

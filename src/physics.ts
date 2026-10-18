@@ -180,6 +180,18 @@ const restitution: Record<Surface, number> = {
   person: 0.75,
   rubber: 0.8,
 };
+/** The same authored island polygon drives both the top mesh and cliff check.
+ * No bobbing or render-only displacement is applied to playable ground. */
+export function platformContains(p:NonNullable<Level["platforms"]>[number],x:number,y:number,r=R){
+  if(!p.outline)return x>=p.x+r&&x<=p.x+p.w-r&&y>=p.y+r&&y<=p.y+p.h-r;
+  let inside=false,min=Infinity;const a=p.outline;
+  for(let i=0,j=a.length-1;i<a.length;j=i++){
+    const v=a[j],w=a[i];if((v.y>y)!==(w.y>y)&&x<(w.x-v.x)*(y-v.y)/(w.y-v.y)+v.x)inside=!inside;
+    const dx=w.x-v.x,dy=w.y-v.y,t=Math.max(0,Math.min(1,((x-v.x)*dx+(y-v.y)*dy)/(dx*dx+dy*dy)));
+    min=Math.min(min,Math.hypot(x-v.x-dx*t,y-v.y-dy*t));
+  }
+  return inside&&min>=r;
+}
 /** Fixed simulation time starts at level entry, advances during aiming, freezes on outcome. */
 export function step(b: Ball, l: Level, dt = STEP) {
   if (b.state === "won" || b.state === "lost") return;
@@ -341,7 +353,7 @@ export function step(b: Ball, l: Level, dt = STEP) {
   }
   b.time += dt;
   // Only the split-island level has unrailed cliffs. Old courses keep their walls.
-  if(l.platforms && !l.platforms.some(p=>b.x>=p.x+R&&b.x<=p.x+p.w-R&&b.y>=p.y+R&&b.y<=p.y+p.h-R)) {
+  if(l.platforms && !l.platforms.some(p=>platformContains(p,b.x,b.y))) {
     b.state="lost";b.vx=b.vy=0;return;
   }
   const speed = Math.hypot(b.vx, b.vy),

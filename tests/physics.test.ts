@@ -118,12 +118,13 @@ for (const l of levels)
       hole: { x: 850, y: 510 },
     };
     const b = createBall(isolated);
-    b.x = "w" in o ? o.x - 10 : o.x - o.r - 10;
+    const fromRight="r" in o&&o.x-o.r-10<37;
+    b.x = "w" in o ? o.x - 10 : fromRight?o.x+o.r+10:o.x-o.r-10;
     b.y = "w" in o ? o.y + o.h / 2 : o.y;
-    b.vx = 600;
+    b.vx = fromRight?-600:600;
     b.state = "moving";
     step(b, isolated);
-    assert.ok(b.vx < 0, `${o.id} reflects`);
+    assert.ok(fromRight?b.vx>0:b.vx < 0, `${o.id} reflects`);
     assert.equal(b.surface, o.surface);
     clear(b, isolated);
   }

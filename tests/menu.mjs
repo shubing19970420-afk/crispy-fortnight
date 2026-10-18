@@ -30,6 +30,7 @@ try {
     );
   }
   async function point(i) {
+    await page.locator(`[data-level="${i}"]`).scrollIntoViewIfNeeded();
     await idle();
     return page.evaluate((i) => window.golfDebug.island(i), i);
   }

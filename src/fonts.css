@@ -34,9 +34,13 @@
 }
 :root {
   --font-title: "Maoken Assorted Sans", "Title Loading Fallback", HuangYou, sans-serif;
-  /* Approved body face: licensed local ZCOOL QingKe HuangYou, static Regular. */
-  --font-body: HuangYou, sans-serif;
+  /* Reading face: naturally proportioned OFL Noto-derived UI subset. */
+  --font-body: "Golf UI Sans", sans-serif;
   --font-body-weight: 400;
-  --font-body-emphasis: 400;
+  --font-body-emphasis: 700;
   font-synthesis: none;
 }
+/* Normal-proportion reading face, renamed OFL subset of Noto Sans CJK SC 2.004. */
+@font-face{font-family:"Golf UI Sans";src:url('/fonts/golf-ui/GolfUISans-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Golf UI Sans";src:url('/fonts/golf-ui/GolfUISans-Bold.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}
+:root{--font-reading:var(--font-body)}

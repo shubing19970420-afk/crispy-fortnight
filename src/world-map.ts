@@ -1,3 +1,5 @@
+import {farmHouse,rockIsland,seaIsland,surface,palm} from "./diorama-art";
+import {levels} from "./levels";
 import * as T from "three";
 import type { GolfScene } from "./scene";
 
@@ -32,6 +34,7 @@ type Island = {
   chair?: T.Group;
   person?: T.Group;
   rotor?:T.Group;
+  mill?:T.Group;
   lift: number;
   liftVelocity: number;
 };
@@ -45,7 +48,7 @@ export class WorldMap {
   private travel: { index: number; t: number } | null = null;
   private basePosition = new T.Vector3(250, 1050, 1400);
   private selected = -1;
-  constructor(private host: GolfScene) {
+  constructor(private host: GolfScene,private completed:number[] = []) {
     host.scene.add(this.root);
     this.root.add(this.paths);
     for (let i = 0; i < destinations.length; i++) this.buildIsland(i);
@@ -169,8 +172,17 @@ export class WorldMap {
     const g = new T.Group();
     g.userData.level = i;
     this.root.add(g);
+    if(i<3){
     this.slab(338, 265, 37, i === 2 ? 0x916d56 : 0xa98161, -12, g);
     this.slab(350, 270, 13, [0x90c95f, 0x63aa77, 0xe2bb7e,0x90c95f,0x80b9a0][i], 0, g);
+    } else if(i===3){
+      const outline=[[-160,-80],[-100,-140],[75,-130],[160,-75],[175,65],[70,125],[-115,115],[-175,30]].map(([x,y])=>({x,y}));
+      rockIsland(this.host,outline,g,65);surface(this.host,outline,0xa3c77e,0,g,undefined,8);
+    } else {
+      const sea=this.mesh(new T.CircleGeometry(183,24),0x98cbc8,0,-75,0,g);sea.rotation.x=-Math.PI/2;sea.scale.y=.77;sea.castShadow=false;
+      for(const p of levels[4].platforms!){const outline=p.outline!.map(q=>({x:(q.x-450)*.35,y:(q.y-280)*.35}));seaIsland(this.host,outline,g,undefined,55);}
+      palm(this.host,-147,0,g,.45);
+    }
     // Generous raycast disk, separate from decorative meshes. It never receives a game collider.
     const hit = new T.Mesh(
       new T.CylinderGeometry(184, 184, 140, 12),
@@ -292,13 +304,15 @@ export class WorldMap {
       const rotor=island.rotor=new T.Group();rotor.position.set(-20,12,0);g.add(rotor);
       for(let j=0;j<4;j++){const arm=new T.Group();arm.rotation.y=j*Math.PI/2;rotor.add(arm);this.box(110,13,18,0xe8c886,65,0,0,arm,2);this.box(18,14,19,0xef9166,110,0,0,arm,1);}
       this.mesh(new T.CylinderGeometry(16,20,28,8),0xffe9ae,-20,14,0,g);
-      island.flag=this.hole(115,-55,g);island.trees.push(this.tree(-120,-70,.7,g));
+      island.flag=this.hole(113,55,g);island.mill=farmHouse(this.host,g,95,-65,.55);
+      for(let j=0;j<8;j++){const x=-115+(j%4)*12,z=-65+Math.floor(j/4)*12;this.mesh(new T.CylinderGeometry(1,1,18,4),0xd8b967,x,10,z,g);const ear=this.mesh(new T.IcosahedronGeometry(3),0xefdb9c,x,20,z,g);ear.scale.y=1.6;}
+      this.mesh(new T.DodecahedronGeometry(13),0xa5ad98,-130,4,72,g);
     }
     if(i===4){
-      for(const [x,z,c] of [[-80,28,0x66c5ce],[68,-20,0xef9166]]){
-        const ring=this.mesh(new T.TorusGeometry(30,6,6,20),c,x,8,z,g);ring.rotation.x=Math.PI/2;
-        this.box(8,46,8,c,x,23,z-38,g,2);this.box(8,46,8,c,x,23,z+38,g,2);this.box(8,8,82,0xffedb8,x,49,z,g,2);
-      }island.flag=this.hole(115,65,g);
+      for(const [x,z,c] of [[-75,0,0x66c5ce],[70,-45,0xef9166]]){
+        const ring=this.mesh(new T.TorusGeometry(16,4,6,20),c,x,8,z,g);ring.rotation.x=Math.PI/2;
+        this.box(5,30,5,c,x,15,z-23,g,1);this.box(5,30,5,c,x,15,z+23,g,1);this.box(5,5,50,0xffedb8,x,32,z,g,1);
+      }island.flag=this.hole(70,52,g);
     }
     // A pennant-shaped 3D number marker, not a flat web card.
     const post = this.box(5, 46, 5, 0x8c654b, -128, 22, 47, g);
@@ -323,17 +337,13 @@ export class WorldMap {
     g.add(label);
   }
   layout() {
-    const portrait = this.host.canvas.parentElement!.clientWidth < 650;
-    const positions = portrait
-      ? [
-          [-185,0,410], [185,28,180], [-185,5,-110], [185,0,-350], [0,5,-730],
-        ]
-      : [
-          [-385, 0, 150],
-          [0, 45, -185],
-          [400, -4, 60],
-          [-220,0,565], [230,5,550],
-        ];
+    const portrait = window.innerWidth < 650;
+    // Build in the camera's horizontal basis so screen order is always 01→05.
+    const yaw=Math.atan2(this.basePosition.x,this.basePosition.z),u=new T.Vector3(Math.cos(yaw),0,-Math.sin(yaw)),v=new T.Vector3(Math.sin(yaw),0,Math.cos(yaw));
+    const slots=portrait
+      ? [[-18,-920],[18,-460],[-18,0],[18,460],[-18,920]]
+      : [[-850,-170],[-425,165],[0,-170],[425,165],[850,-170]];
+    const positions=slots.map(([x,z])=>u.clone().multiplyScalar(x).addScaledVector(v,z).toArray());
     this.islands.forEach((island, i) => {
       island.group.position.fromArray(positions[i]);
       island.group.userData.baseY = positions[i][1];
@@ -344,24 +354,27 @@ export class WorldMap {
       const a = this.islands[i].group.position,
         b = this.islands[i + 1].group.position;
       const curve = new T.CatmullRomCurve3([
-        a.clone().add(new T.Vector3(100, -6, -10)),
+        a.clone().addScaledVector(portrait?v:u,portrait?120:150).add(new T.Vector3(0,-6,0)),
         a
           .clone()
           .lerp(b, 0.5)
           .add(new T.Vector3(35, -30, 40)),
-        b.clone().add(new T.Vector3(-120, -6, 35)),
+        b.clone().addScaledVector(portrait?v:u,portrait?-120:-150).add(new T.Vector3(0,-6,0)),
       ]);
+      const earned=this.completed.includes(i),available=i<2||earned;
       for (let j = 1; j < 22; j++) {
         const p = curve.getPoint(j / 22),
           dot = this.mesh(
             new T.SphereGeometry(j % 4 === 0 ? 5 : 3, 6, 4),
-            0xffedbd,
+            earned?0xffefaf:0xc3d5c7,
             p.x,
             p.y,
             p.z,
             this.paths,
           );
         dot.castShadow = false;
+        (dot.material as T.MeshStandardMaterial).transparent=true;
+        (dot.material as T.MeshStandardMaterial).opacity=earned?1:available?.55:.2;
       }
     }
     this.host.camera.position.copy(this.basePosition);
@@ -395,15 +408,12 @@ export class WorldMap {
             maxY = Math.max(maxY, p.y);
           }
     });
-    minX -= 25;
-    maxX += 25;
-    minY -= 55;
-    maxY += 30;
-    const h = Math.max(maxY - minY, (maxX - minX) / aspect) * 1.04,
-      w = h * aspect,
-      cx = (maxX + minX) / 2,
-      cy = (maxY + minY) / 2,
-      c = this.host.camera;
+    minX -= 25;maxX +=25;
+    const compact=r.width<1100, bottomPixels=portrait?80:compact?82:115,topPixels=16;
+    const usable=Math.max(.3,1-(bottomPixels+topPixels)/r.height);
+    const h=Math.max((maxY-minY)/usable,(maxX-minX)/aspect)*1.025,
+      w=h*aspect,cx=(maxX+minX)/2,
+      cy=(maxY+minY)/2+(topPixels-bottomPixels)*h/r.height/2,c=this.host.camera;
     c.left = cx - w / 2;
     c.right = cx + w / 2;
     c.top = cy + h / 2;
@@ -444,7 +454,7 @@ export class WorldMap {
   anchor(index: number, label = false) {
     const p = this.islands[index].group.position.clone();
     p.y = this.islands[index].group.userData.baseY + (label ? -12 : 10);
-    if (label) p.z += 142;
+    if(label){const yaw=Math.atan2(this.basePosition.x,this.basePosition.z);p.x+=Math.sin(yaw)*145;p.z+=Math.cos(yaw)*145;}
     const v = p.project(this.host.camera),
       r = this.host.canvas.getBoundingClientRect();
     return {
@@ -473,7 +483,8 @@ export class WorldMap {
       for (let j = 0; j < s.trees.length; j++)
         s.trees[j].rotation.z =
           Math.sin(t * (active ? 2.7 : 1) + j) * (active ? 0.065 : 0.012);
-      if(s.rotor)s.rotor.rotation.y=-t*.85;
+      if(s.rotor)s.rotor.rotation.y=-t*.5;
+      if(s.mill)s.mill.rotation.z=-t*.35;
       if (s.flag)
         s.flag.rotation.y =
           Math.sin(t * (active ? 4 : 2)) * (active ? 0.3 : 0.1);
@@ -511,6 +522,7 @@ export class WorldMap {
   }
   snapshot() {
     return {
+      links:Array.from({length:4},(_,i)=>({from:i,to:i+1,completed:this.completed.includes(i),unlocked:i<2||this.completed.includes(i),opacity:((this.paths.children[i*21] as T.Mesh)?.material as T.MeshStandardMaterial)?.opacity})),
       hovered: this.hovered,
       transitioning: this.transitioning,
       zoom: this.host.camera.zoom,

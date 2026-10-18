@@ -16,6 +16,32 @@
     "conversion": "FontTools 4.61.1; WOFF2 with no glyph transforms, subsetting, renaming or metadata changes; original SFNT tables verified except head checksum and WOFF2 compression flag. See OFL FAQ 2.2, 2.7 and 2.8."
   },
   "body": {
+    "family": "Golf UI Sans",
+    "upstream": "Noto Sans CJK SC",
+    "version": "2.004",
+    "source": "https://github.com/notofonts/noto-cjk",
+    "distribution": "Debian fonts-noto-cjk; collection index 2",
+    "license": "SIL OFL 1.1",
+    "licenseFile": "golf-ui/OFL.txt",
+    "modifications": "Renamed UI subset; natural glyph proportions unchanged",
+    "files": [
+      {
+        "file": "golf-ui/GolfUISans-Regular.woff2",
+        "sha256": "e258567d110a1384cbb8dcb2e9a8653a5a7d4bc42d33b15351b5dcbc2a23038e",
+        "weight": 400,
+        "characters": 779,
+        "bytes": 116536
+      },
+      {
+        "file": "golf-ui/GolfUISans-Bold.woff2",
+        "sha256": "38383a740b07791227b6dbe26e6191af0b25c5e08c17140bb85736d7e1a94ca0",
+        "weight": 700,
+        "characters": 779,
+        "bytes": 118832
+      }
+    ]
+  },
+  "legacyBody": {
     "family": "ZCOOL QingKe HuangYou",
     "status": "approved-local-body-font",
     "source": "https://github.com/google/fonts/tree/main/ofl/zcoolqingkehuangyou",

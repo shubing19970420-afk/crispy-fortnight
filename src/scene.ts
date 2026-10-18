@@ -1,3 +1,4 @@
+import {CourseLandscape} from "./diorama-art";
 import {SpecialModels} from "./special-models";
 import * as T from "three";
 import { CourseModels } from "./course-models";
@@ -24,6 +25,8 @@ export class GolfScene {
   colliders: { rect: Rect; mesh: T.Object3D }[] = [];
   private course?: CourseModels;
   private special?:SpecialModels;
+  private landscape?:CourseLandscape;
+  private shadowGround!:T.Mesh;
   private ray = new T.Raycaster();
   private plane = new T.Plane(new T.Vector3(0, 1, 0), 0);
   private level: Level = levels[0];
@@ -67,6 +70,7 @@ export class GolfScene {
       new T.PlaneGeometry(6000, 6000),
       new T.ShadowMaterial({ opacity: 0.13 }),
     );
+    this.shadowGround=ground;
     ground.rotation.x = -Math.PI / 2;
     ground.position.y = -88;
     ground.receiveShadow = true;
@@ -204,15 +208,17 @@ export class GolfScene {
     this.colliders = [];
     this.course = undefined;
     this.special=undefined;
+    this.landscape=undefined;
     this.capture = undefined;
     this.burstTime = -1;
     this.lastBall = undefined;
   }
-  showMap() {
+  showMap(completed:number[] = []) {
+    this.shadowGround.visible=true;
     this.clearLevel();
     this.root.visible = false;
     this.map?.dispose();
-    this.map = new WorldMap(this);
+    this.map = new WorldMap(this,completed);
     this.resize();
   }
   setLevel(index: number) {
@@ -225,16 +231,13 @@ export class GolfScene {
     this.clearLevel();
     const l = (this.level = levels[index]),
       office = !!l.office;
-    if(l.platforms) {
-      for(const p of l.platforms){
-        this.box(p.w,54,p.h,0xb78c64,p.x+p.w/2-450,-37,p.y+p.h/2-280,8);
-        const shape=new T.Shape();shape.moveTo(p.x-450,280-p.y);shape.lineTo(p.x+p.w-450,280-p.y);shape.lineTo(p.x+p.w-450,280-p.y-p.h);shape.lineTo(p.x-450,280-p.y-p.h);shape.closePath();
-        if(l.hole.x>p.x&&l.hole.x<p.x+p.w){const hole=new T.Path();hole.absarc(l.hole.x-450,280-l.hole.y,17,0,Math.PI*2,true);shape.holes.push(hole);}
-        const geo=new T.ExtrudeGeometry(shape,{depth:10,bevelEnabled:false,curveSegments:24});geo.rotateX(-Math.PI/2);this.mesh(geo,green,0,-10,0).castShadow=false;
-      }
-    } else {
+    this.shadowGround.visible=!l.rotor&&!l.platforms;
+    this.landscape=new CourseLandscape(this,l);
+    if(!l.platforms) {
+    if(!l.rotor){
     this.box(900, 54, 560, office ? 0xb98760 : 0xb78c64, 0, -37, 0, 12);
     this.box(860, 18, 520, office ? 0x936546 : 0x8a7459, 0, -71, 0, 8);
+    }
     // Extruded surface contains a genuine hole; all positions use physics units.
     const s = new T.Shape();
     s.moveTo(-450, -280);
@@ -253,7 +256,7 @@ export class GolfScene {
     geo.rotateX(-Math.PI / 2);
     this.mesh(
       geo,
-      office ? 0xd8dfce : l.forest ? 0x699d66 : green,
+      office ? 0xd8dfce : l.forest ? 0x699d66 : l.rotor?0xa0c77b:green,
       0,
       -10,
       0,
@@ -272,7 +275,7 @@ export class GolfScene {
               58,
               0.12,
               b - a,
-              office ? 0xefd18b : 0x8bce65,
+              office ? 0xefd18b : l.rotor?0xa8cd84:0x8bce65,
               x,
               0.08,
               (a + b) / 2,
@@ -326,7 +329,7 @@ export class GolfScene {
     this.course = new CourseModels(this, l);
     this.special = new SpecialModels(this,l);
     this.colliders = this.course.rects;
-    if (!office && !l.forest && !l.platforms) this.garden();
+    if (!office && !l.forest && !l.platforms && !l.rotor) this.garden();
     this.flag = new T.Group();
     this.flag.position.copy(world(l.hole.x + 19, l.hole.y, 0));
     this.root.add(this.flag);
@@ -460,9 +463,9 @@ export class GolfScene {
       maxX = -Infinity,
       minY = Infinity,
       maxY = -Infinity;
-    for (const x of [-490, 490])
-      for (const y of [-90, 175])
-        for (const z of [-405, 310]) {
+    for (const x of (this.level.rotor?[-570,570]:[-490, 490]))
+      for (const y of (this.level.rotor?[-150,210]:this.level.platforms?[-270,175]:[-90, 175]))
+        for (const z of (this.level.rotor?[-560,365]:[-405, 310])) {
           const p = new T.Vector3(x, y, z).applyMatrix4(
             this.camera.matrixWorldInverse,
           );
@@ -507,6 +510,7 @@ export class GolfScene {
   updateBall(b: Ball, dt: number) {
     this.course?.update(b);
     this.special?.update(b.time);
+    this.landscape?.update(b.time);
     if (this.capture) {
       const c = this.capture;
       c.t += dt;

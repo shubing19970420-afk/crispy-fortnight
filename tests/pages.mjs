@@ -18,7 +18,7 @@ if(!process.env.PAGES_URL){
  }catch{res.writeHead(404);res.end('Missing static file');}});
  await new Promise(r=>server.listen(0,'127.0.0.1',r));
 }
-const url=process.env.PAGES_URL||`http://127.0.0.1:${server.address().port}${prefix}`;
+const url=process.env.PAGES_URL?`${process.env.PAGES_URL}${process.env.PAGES_URL.includes("?")?"&":"?"}build=${process.env.GITHUB_SHA||Date.now()}`:`http://127.0.0.1:${server.address().port}${prefix}`;
 const browser=await chromium.launch({...(process.env.CHROMIUM_PATH?{executablePath:process.env.CHROMIUM_PATH}:{}),args:['--no-sandbox','--enable-unsafe-swiftshader']}).catch(error=>{server?.close();throw error;});
 const page=await browser.newPage({viewport:{width:1280,height:900}});
 const errors=[],failures=[],resources=[];
@@ -39,10 +39,10 @@ try{
  await page.evaluate(()=>localStorage.setItem("golf-progress-v4","[0,1,2,3]"));await page.reload({waitUntil:"domcontentloaded"});
  await page.locator('[data-level="0"]').waitFor({state:'visible'});
  await page.evaluate(async()=>{
-  await Promise.all([document.fonts.load('24px "Maoken Assorted Sans"','一杆归洞办公室高尔夫'),document.fonts.load('24px HuangYou','设置0123456789'),document.fonts.load('24px Smiley','0123456789')]);await document.fonts.ready;
+  await Promise.all([document.fonts.load('24px "Maoken Assorted Sans"','一杆归洞办公室高尔夫'),document.fonts.load('24px "Golf UI Sans"','设置0123456789'),document.fonts.load('700 24px "Golf UI Sans"','0123456789')]);await document.fonts.ready;
  });
  const fonts=await page.evaluate(()=>[...document.fonts].filter(f=>f.status==='loaded').map(f=>f.family));
- for(const font of ['Maoken Assorted Sans','HuangYou','Smiley'])assert.ok(fonts.includes(font),`${font} decoded`);
+ for(const font of ['Maoken Assorted Sans','Golf UI Sans'])assert.ok(fonts.includes(font),`${font} decoded`);
  assert.ok(await page.locator('.official-logo').evaluate(e=>e.complete&&e.naturalWidth>1000&&e.naturalHeight>300),'original logo loaded');
  assert.equal(await page.locator('#webgl-error').isVisible(),false);
  assert.equal(await page.locator('canvas').count(),1);
@@ -59,11 +59,21 @@ try{
   if(i>=2){await page.locator('#route-drawer').click();await page.waitForFunction(()=>!!document.querySelector('[data-verified-route]'),{},{timeout:40000});await page.locator('#route-close').click();}
   await page.locator('#home').click();await page.locator('#menu').waitFor({state:'visible'});
  }
- await page.setViewportSize({width:390,height:844});await page.waitForTimeout(200);await page.screenshot({path:`${output}/mobile.png`});
+ for(const [width,height] of [[1280,900],[844,390],[700,600],[650,600],[390,844],[320,640]]){
+  await page.setViewportSize({width,height});await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
+  const boxes=await page.locator('[data-level]').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().toJSON()));
+  for(let i=0;i<boxes.length;i++){
+   assert.ok(boxes[i].left>=0&&boxes[i].right<=width+1,'production plaques fit width');
+   if(i)assert.ok(width>=650?boxes[i].left>boxes[i-1].left:boxes[i].top>boxes[i-1].top,'production map order');
+   for(let j=i+1;j<boxes.length;j++)assert.ok(Math.min(boxes[i].right,boxes[j].right)-Math.max(boxes[i].left,boxes[j].left)<=2||Math.min(boxes[i].bottom,boxes[j].bottom)-Math.max(boxes[i].top,boxes[j].top)<=2,'production plaques do not overlap');
+  }
+ }
+ await page.setViewportSize({width:390,height:844});await page.locator('#viewport').evaluate(e=>e.scrollTop=0);await page.waitForTimeout(200);await page.screenshot({path:`${output}/mobile.png`});
+ await page.locator('[data-level="4"]').scrollIntoViewIfNeeded();await page.waitForTimeout(100);await page.screenshot({path:`${output}/mobile-bottom.png`});
  assert.ok(resources.some(r=>r.url.includes('route-worker-')&&r.status===200),'production route worker loaded');
  assert.ok(resources.filter(r=>r.url.includes('.woff2')&&r.status===200).length>=3,'font requests succeeded');
  assert.deepEqual(errors,[]);assert.deepEqual(failures,[]);
  await writeFile(`${output}/report.json`,JSON.stringify({url,fonts,levels:names,resources,errors,failures},null,2));
- console.log(`PASS ${process.env.PAGES_URL?'published':'production subdirectory'} game: CSS/JS, original logo, 3 local fonts, WebGL, all 5 levels/retry/home, real route worker, mobile; no failed resources`);
+ console.log(`PASS ${process.env.PAGES_URL?'published':'production subdirectory'} game: CSS/JS, original logo, title and regular/bold reading fonts, WebGL, all 5 levels/retry/home, real route worker, mobile; no failed resources`);
 }catch(error){await page.screenshot({path:`${output}/failure.png`});await writeFile(`${output}/report.json`,JSON.stringify({url,resources,errors,failures,error:String(error)},null,2));throw error;}
 finally{await browser.close();await new Promise(r=>server?server.close(r):r());}

@@ -2,7 +2,7 @@
 
 Three.js + TypeScript + Vite 的五关 2.5D 高尔夫解谜。拖拽、松手，一杆进洞。低多边形微缩岛屿、固定正交视角和玩具木牌 UI；无后端或运行时 CDN。
 
-![最新选关界面](docs/screenshots/latest-menu.png)
+![最新选关界面](docs/screenshots/art-menu-desktop.png)
 
 ## 浏览器试玩
 
@@ -30,13 +30,13 @@ npm run dev
 | 01 就在眼前 | 开阔草地，学习方向和力度 |
 | 02 请走弯路 | 森林 Z 型双折返，穿北缺口、南缺口，借上下边墙反弹 |
 | 03 办公室高尔夫 | 家具间绕行；桌底可穿，桌腿会挡；观察固定周期巡逻的同事 |
-| 04 风车捣蛋鬼 | 绕过木墙，借顺时针叶片把球转向洞口，让障碍成为帮手 |
-| 05 不可能的一杆 | 两块分离岛屿，利用蓝橙传送门和出口朝向完成一杆 |
+| 04 风车捣蛋鬼 | 山地田园主题；绕过木墙，借顺时针叶片把球转向洞口，让障碍成为帮手 |
+| 05 不可能的一杆 | 海上悬浮岩岛，利用蓝橙传送门和出口朝向完成一杆 |
 
-原三关继续开放，配置、场景、镜头及物理参数不变。04在完成03后解锁，05在完成04后解锁；旧进度与最佳成绩保留。新两岛与原三岛共用渲染器，岛屿／木牌可点击选择；手机木牌缩小以保留模型可见度。
+原三关继续开放，配置、场景、镜头及物理参数不变。04在完成03后解锁，05在完成04后解锁；旧进度与最佳成绩保留。新两岛与原三岛共用渲染器，岛屿／木牌可点击选择；横屏为01、03、05偏上，02、04偏下的交错五关路线，连接严格按编号推进；手机使用可上下滚动的纵向路线，返回选关恢复原滚动位置。已完成路径更亮，未解锁路径更淡。
 
-![风车关](docs/screenshots/latest-level-4.png)
-![传送关](docs/screenshots/latest-level-5.png)
+![风车关](docs/screenshots/art-level-4-desktop.png)
+![传送关](docs/screenshots/art-level-5-desktop.png)
 
 ## 操作、提示与成绩
 
@@ -60,17 +60,18 @@ npm run dev
 | `src/levels.ts` | 五关坐标、碰撞体、家具、巡逻、风车与双岛传送门配置 |
 | `src/physics.ts` | 240Hz二维物理、连续碰撞／进洞、相对运动反弹、传送事件 |
 | `src/scene.ts`、`src/course-models.ts` | 共用 Three.js 渲染器、原三关模型、二维到XZ坐标映射 |
-| `src/special-models.ts` | 与物理参数共用尺寸、角度的原创风车及传送门模型 |
+| `src/special-models.ts`、`src/diorama-art.ts` | 击球风车／传送门、田园台地、山峦麦田、立式风车屋、岩岛及海面 |
+| `src/menu-backdrop.ts` | 原创低饱和远山、树林轮廓、河流与云影背景 |
 | `src/world-map.ts` | 五岛菜单、射线选中、悬停与进入过场 |
 | `src/route-hints.ts`、`src/route-worker.ts`、`src/route-map.ts` | 真实回放、后台搜索和碰撞地图 |
 | `src/records.ts`、`src/ui-kit.ts` | 五关成绩读取、结算分类、原有星章评价 |
-| `src/iteration.css` | 本轮副标、失败装饰、阅读字体、顶部灯泡、手机木牌适配 |
+| `src/iteration.css`、`src/world-refresh.css` | 玩具界面、正常比例正文、居中失败提示、滚动地图与响应式排版 |
 
 风车叶片在旋转坐标系中执行与家具相同的扫掠碰撞，再按接触点的表面速度反弹；240Hz下本关每步转角约0.12°，大步长会细分。传送入口采用连续圆形检测，与墙、洞口比较事件先后，传送时旋转速度向量并保持其长度，随后正常扣除摩擦；出口偏移和短冷却防止立即来回传送。门框立柱具有与模型相同的真实碰撞体，横梁位于球可穿过的高度。新机制仅在对应关卡的可选配置存在时启用，不改变原三关的摩擦、反弹和捕获规则。
 
 Logo为用户提供的 `src/assets/game-logo.png`（2023×777 RGBA），原始比例及字形保留，文件未修改。模型、UI 矢量、击球音效和音乐由程序原创生成，未裁切参考图作界面。
 
-本地字体与许可证在 `public/fonts/`：标题／按钮为猫啃什锦黑1.70（作者官方发行，SIL OFL1.1）；数字及既有辅助字体为合法黄油体 Regular400，保留得意黑资源。设置、玩法说明和游戏提示改用较宽的本地猫啃字体自然字形，不缩放文字比例，不引入新字体。完整来源、版本、许可证和散列见 [字体说明](public/fonts/README.md)、`font-manifest.json` 与 `SHA256SUMS`。
+本地字体与许可证在 `public/fonts/`：标题／按钮为猫啃什锦黑1.70（作者官方发行，SIL OFL1.1）；辅助文字与数字统一为正常宽高比例的 Golf UI Sans 400／700，基于合法 Noto Sans CJK SC 2.004 的改名界面子集，两个本地 WOFF2 共约230KB。包含设置、说明、提示、成绩标签和数字；未压缩字形或使用窄长装饰字体。OFL全文、版权、包来源及脚本见 `public/fonts/golf-ui/`。旧黄油体／得意黑保留授权作为兼容资源，不再用于正式辅助文字。完整来源、版本、许可证和散列见 [字体说明](public/fonts/README.md)、`font-manifest.json` 与 `SHA256SUMS`。
 
 ## 测试与实际截图
 
@@ -78,6 +79,7 @@ Logo为用户提供的 `src/assets/game-logo.png`（2023×777 RGBA），原始�
 npm test
 npm run build
 # 下面的浏览器测试需要先运行 npm run dev，并安装 Chromium：
+npm run test:art
 npm run test:expansion
 node tests/office-pointer.mjs
 node tests/menu.mjs
@@ -92,9 +94,30 @@ CHROMIUM_PATH=/usr/bin/chromium node tests/pages.mjs
 实际 Chromium 截图：
 
 - [桌面首页](docs/screenshots/latest-menu.png)／[390px首页](docs/screenshots/latest-menu-390.png)／[320px首页](docs/screenshots/latest-menu-320.png)
-- [第一关](docs/screenshots/latest-level-1.png)／[第二关](docs/screenshots/latest-level-2.png)／[第三关](docs/screenshots/latest-level-3.png)／[第四关](docs/screenshots/latest-level-4.png)／[第五关](docs/screenshots/latest-level-5.png)
+- [第一关](docs/screenshots/latest-level-1.png)／[第二关](docs/screenshots/latest-level-2.png)／[第三关](docs/screenshots/latest-level-3.png)／[第四关](docs/screenshots/art-level-4-desktop.png)／[第五关](docs/screenshots/art-level-5-desktop.png)
 - [失败界面](docs/screenshots/iteration-failure.png)／[设置](docs/screenshots/iteration-settings-1280.png)／[手机设置](docs/screenshots/iteration-settings-390.png)
 
 参考杆（角度为二维物理平面弧度，拖拽单位最大150）：01为0／65；02为−1.06／125；03为−0.748／125且需观察同事时机。04可在重试后约0～0.6秒以−0.41／95出杆，或等灯泡推荐窗口；05朝蓝门水平向右，力度65～75。
 
 尚需确认：实体手机触感、音效听感和低端设备帧率；浏览器截图使用软件 WebGL。Three.js 主包仍有 Vite 默认500KB体积警告，构建成功。五关仍不代表已经达到最终30分钟以上体验目标，作业截止为10月19日23:59。
+
+## 本轮美术预览与验收
+
+- 04的球场仍是原来平整、同坐标的击球区域，围墙、木墙及水平叶片参数不变；外圈新增不规则台地、岩石层、起伏草坡、麦田、围栏、云和浅色山峦。远处立式风车屋只做气氛动画，不能当作击球叶片。
+- 05取消方形草板：岛面、沙岸与岩层来自同一份不规则多边形；物理坠落判定也读取该轮廓，并留球半径的安全内缩。起球点、洞口及两门坐标未移动，已验证的传送解仍成立。海面在岛下，岛屿顶面保持Y=0，不作与碰撞脱节的浮动。仅波纹亮斑动画；棕榈、岸石与实际碰撞体对应。缩略岛屿同步使用田园及双岩岛主题。
+- 首页为原创轻量矢量背景与实时三维岛屿组合，未裁切参考图作背景。所有组件仍可交互，复用同一 Three.js renderer。
+- 失败插画缩小，标题移至卡片中心附近并略缩小，与底部两按钮保持留白。胜利与新纪录的结构保留，仅统一其中辅助文字的正常比例字体。
+
+本轮真实截图：
+
+[桌面地图](docs/screenshots/art-menu-desktop.png) · [横屏紧凑地图](docs/screenshots/art-menu-landscape.png) · [手机地图上段](docs/screenshots/art-menu-mobile.png) · [手机地图下段](docs/screenshots/art-menu-mobile-bottom.png)
+
+[山地田园关](docs/screenshots/art-level-4-desktop.png) · [海上岩岛关](docs/screenshots/art-level-5-desktop.png) · [手机田园关](docs/screenshots/art-level-4-mobile.png) · [手机岩岛关](docs/screenshots/art-level-5-mobile.png)
+
+[失败弹窗](docs/screenshots/art-failure-desktop.png) · [小屏成绩](docs/screenshots/art-score-small.png) · [手机设置](docs/screenshots/art-settings-mobile.png)
+
+截图来自 Chromium 软件 WebGL；地图部分截图使用测试进度展示已完成路径，不代表用户的个人成绩。`test:art`验证1440×960、1024×768、844×390、700×600、650×600、390×844、320×640的顺序、完整木牌、无相互遮挡、可点击岛屿、滚动、字体、成绩和弹窗间距；另用真实触屏事件验证上滑不误选、点岛进入和返回保留滚动位置；`island-outlines.test.ts`验证真实岛缘、海水空隙及保留的传送通关解。
+
+### 待上传的指定 BGM
+
+云环境不能访问用户本机 `D:/其他/城市生活中的休闲时光风格-休闲治愈-雨后晴空_爱给网_aigei_com.mp3`，仓库／工作区也未找到该音频。本轮**没有将其接入，也没有用其他曲目冒充**，仍保留已有原创合成音乐与独立的音乐／音效开关。请上传 MP3 到聊天，或提交到仓库 `public/audio/`，届时再接入并实听检查低音量淡入、首页／关卡连续播放、重试不重头及循环衔接。本轮未验证该缺失文件的循环效果。
