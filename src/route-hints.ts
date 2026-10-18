@@ -38,7 +38,7 @@ export function findOfficeRoute(level:Level,time:number):Route|null {
  * advertise a rotor shot if it succeeds throughout a 0.6-second release window. */
 export function findRoute(level:Level,time:number):Route|null {
   if(level.walker)return findOfficeRoute(level,time);
-  if(level.portals)return simulateRoute(level,time,0,70);
+  if(level.portals)return simulateRoute(level,time,0,110);
   if(!level.rotor)return null;
   const angles=[-.41,-.4,-.44,-.36,-.48,-.32,-1.23,-1.11,0,-.15,-.9,-.6,-.3,.15,.3,-1.4];
   for(const power of [95,100,105,90,110,80,120,130,140])for(const angle of angles){

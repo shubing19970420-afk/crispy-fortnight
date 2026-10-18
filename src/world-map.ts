@@ -312,7 +312,13 @@ export class WorldMap {
       for(const [x,z,c] of [[-75,0,0x66c5ce],[70,-45,0xef9166]]){
         const ring=this.mesh(new T.TorusGeometry(16,4,6,20),c,x,8,z,g);ring.rotation.x=Math.PI/2;
         this.box(5,30,5,c,x,15,z-23,g,1);this.box(5,30,5,c,x,15,z+23,g,1);this.box(5,5,50,0xffedb8,x,32,z,g,1);
-      }island.flag=this.hole(70,52,g);
+      }
+      for(const o of levels[4].obstacles.filter(o=>o.id.startsWith("reef-"))){
+        const x=(o.x+o.w/2-450)*.35,z=(o.y+o.h/2-280)*.35;
+        this.box(o.w*.35,9,o.h*.35,0x5d9ea0,x,4.5,z,g,1);
+        this.box(o.w*.35,2,o.h*.35,0xf4d6a0,x,10,z,g,1);
+      }
+      island.flag=this.hole((levels[4].hole.x-450)*.35,(levels[4].hole.y-280)*.35,g);
     }
     // A pennant-shaped 3D number marker, not a flat web card.
     const post = this.box(5, 46, 5, 0x8c654b, -128, 22, 47, g);

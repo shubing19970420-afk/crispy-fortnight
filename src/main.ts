@@ -8,6 +8,7 @@ import "./ui-tokens.css";
 import "./ui-kit.css";
 import "./iteration.css";
 import "./world-refresh.css";
+import "./local-polish.css";
 import {menuBackdrop} from "./menu-backdrop";
 import { carvedPlaque, recordMedals, solidIcon, toyFace, powerSegments } from "./ui-kit";
 import { routeMap } from "./route-map";
@@ -25,9 +26,9 @@ import { victory, readScores } from "./records";
 function boot() {
   const app = document.querySelector<HTMLDivElement>("#app")!;
   app.innerHTML = `${menuBackdrop}<div class="cloud cloud-a"></div><div class="cloud cloud-b"></div><div id="viewport"><div id="canvas-surface"><canvas aria-label="立体高尔夫球场：按住白球向后拖拽，松手击球"></canvas><div id="map-labels">${destinations.map((d, i) => `<button class="map-label" data-level="${i}" aria-label="进入第${i + 1}关 ${d.title}">${carvedPlaque()}<span class="plank-hangers" aria-hidden="true"></span><span class="level-number" aria-hidden="true">0${i+1}</span><strong>${d.title}</strong>${recordMedals(undefined)}<i class="progress" aria-label="通关进度"></i></button>`).join("")}</div></div></div>
-<header><button id="home" class="icon prop-button" aria-label="返回选关">${toyFace(solidIcon("home"))}</button><div class="header-tools"><aside id="route-dock" hidden><button id="route-drawer" aria-label="打开路线提示" aria-expanded="false" aria-controls="route-content">${bulbProp()}</button></aside><button id="sound" class="icon prop-button" aria-label="关闭音效" aria-pressed="true">${icon("sound")}<span class="icon-label">音效开</span></button><button id="settings-open" class="icon prop-button" aria-label="打开设置" aria-haspopup="dialog">${toyFace(solidIcon("settings"))}</button></div></header>
+<header><button id="home" class="icon prop-button" aria-label="返回选关">${toyFace(solidIcon("home"))}</button><div class="header-tools"><button id="sound" class="icon prop-button" aria-label="关闭音效" aria-pressed="true">${icon("sound")}<span class="icon-label">音效开</span></button><button id="settings-open" class="icon prop-button" aria-label="打开设置" aria-haspopup="dialog">${toyFace(solidIcon("settings"))}</button></div></header>
 <section id="menu"><div class="logo has-official-logo"><h1><img class="official-logo" src="${gameLogo}" width="2023" height="777" alt="一杆归洞" draggable="false" fetchpriority="high"></h1><span class="logo-english" aria-hidden="true">HOLE IN ONE</span></div><button id="menu-assist" hidden class="assist-setting" aria-pressed="false">⚑ 办公室路线辅助：关闭</button></section>
-<section id="game" hidden><div class="level-title">${carvedPlaque()}<span id="subtitle"></span><h2 id="title"></h2></div><div id="shot" class="shot">● 一杆机会</div><div id="tutorial" hidden><span class="hand">☝</span><strong>拖拽白球，松手击球</strong><button id="tutorial-close">知道了</button></div><div class="game-bottom"><div class="feedback"><span id="status" role="status" aria-live="polite">拖拽白球以瞄准</span><div class="power-row"><span class="tee-icon" aria-hidden="true">⚑</span><div class="meter"><i id="power"></i><span class="meter-ticks">${powerSegments()}</span><span class="power-ball" aria-hidden="true"></span></div><b id="percent">0%</b></div></div><div class="controls"><button id="retry" class="prop-button prop-button--coral">${toyFace(`${solidIcon("retry")}<span>重试</span>`)}</button><button id="back" hidden>▦ 选关</button></div><p id="hint"></p></div></section>
+<section id="game" hidden><div class="level-title">${carvedPlaque()}<span id="subtitle"></span><h2 id="title"></h2></div><div id="shot" class="shot">● 一杆机会</div><div id="tutorial" hidden><span class="hand">☝</span><strong>拖拽白球，松手击球</strong><button id="tutorial-close">知道了</button></div><div class="game-bottom"><div class="feedback"><span id="status" role="status" aria-live="polite">拖拽白球以瞄准</span><div class="power-row"><span class="tee-icon" aria-hidden="true">⚑</span><div class="meter"><i id="power"></i><span class="meter-ticks">${powerSegments()}</span><span class="power-ball" aria-hidden="true"></span></div><b id="percent">0%</b></div></div><div class="controls"><aside id="route-dock" hidden><button id="route-drawer" aria-label="打开路线提示" aria-expanded="false" aria-controls="route-content">${bulbProp()}</button></aside><button id="retry" class="prop-button prop-button--coral">${toyFace(`${solidIcon("retry")}<span>重试</span>`)}</button><button id="back" hidden>▦ 选关</button></div><p id="hint"></p></div></section>
 <div id="route-content" hidden role="region" tabindex="0" aria-label="路线提示木牌，点击空白或按 Escape 收起"><span class="route-posts" aria-hidden="true"></span>${woodProp()}<h3>路线提示</h3><button id="route-close" aria-label="关闭路线提示">${icon("close")}</button><div id="route-map"></div><div id="route-help" role="status"><span id="route-message"></span><button id="offer-route" hidden>显示路线</button></div><button id="route-toggle" aria-pressed="false">显示路线</button></div><dialog id="settings" aria-labelledby="settings-title"><div class="settings-frame" aria-hidden="true">${woodProp()}</div><div class="settings-head"><div class="settings-sign">${woodProp()}<h2 id="settings-title">设置</h2></div><button id="settings-close" class="icon" aria-label="关闭设置">${icon("close")}</button></div><div class="settings-paper"><div class="setting-row"><strong>♫ 音乐</strong><button id="settings-music" class="toy-switch" role="switch" aria-label="背景音乐" aria-checked="false"><span class="switch-knob"></span><b>关</b></button></div><div class="setting-row"><strong>♪ 音效</strong><button id="settings-sound" class="toy-switch" role="switch" aria-label="游戏音效" aria-checked="true"><span class="switch-knob"></span><b>开</b></button></div><button id="instructions-toggle" aria-expanded="false" aria-controls="instructions">玩法说明 <span aria-hidden="true">⌄</span></button><div id="instructions" hidden>向后拖拽白球，松手击球。<br>每次仅一杆，球经过洞口即通关。<br>第三关起点击灯泡查看路线。</div></div><button id="settings-done">返回游戏</button></dialog>
 <div id="result" hidden><div class="resultbox" role="dialog" aria-modal="true" aria-labelledby="result-title"><div class="ribbon-confetti" aria-hidden="true"><i style="--n:0">★</i><i style="--n:1">▪</i><i style="--n:2">▪</i><i style="--n:3">★</i><i style="--n:4">▪</i><i style="--n:5">▪</i><i style="--n:6">★</i><i style="--n:7">▪</i><i style="--n:8">▪</i><i style="--n:9">★</i><i style="--n:10">▪</i><i style="--n:11">▪</i></div><div class="failure-scene" aria-hidden="true"><span class="failure-ball"></span><span class="failure-hole"></span><span class="failure-flag"></span></div><div id="stars">✦ ★ ✦</div><span id="result-label"></span><h2 id="result-title"></h2><p id="result-text"></p><div id="result-stats" hidden><div><small>本次用时</small><strong id="score-time"></strong></div><div><small>历史最佳</small><strong id="score-best"></strong></div><div><small>反弹次数</small><strong id="score-bounces"></strong></div></div><div id="result-route-offer" hidden><span>需要路线提示吗？</span><button id="result-route">显示路线</button></div><div class="result-actions"><button id="next" class="primary">下一关 →</button><button id="retry-result">↻ 再试一次</button><button id="result-menu">返回选关</button></div></div></div><div id="webgl-error" hidden role="alert"><h2>这个小世界暂时无法打开</h2><p>游戏需要 WebGL。请使用较新的 Chrome、Edge、Firefox 或 Safari，并开启浏览器硬件加速后刷新页面。</p><button onclick="location.reload()">重新加载</button></div>`;
   const el = (id: string) => document.getElementById(id)!;
@@ -55,7 +56,7 @@ function boot() {
   let mapScroll=0;
   const sound = new Sound();
   const music = new Music();
-  try { music.enabled=localStorage.getItem("golf-music")==="on"; } catch {}
+  try { music.enabled=localStorage.getItem("golf-music")!=="off"; } catch {}
   document.addEventListener("pointerdown",()=>music.unlock());
   document.addEventListener("keydown",()=>music.unlock());
   document.addEventListener("visibilitychange",()=>music.visibility());
@@ -111,6 +112,7 @@ function boot() {
     view.clearAim();
   }
   function menu() {
+    sound.reset();
     setRouteOpen(false);
     cancelAnimationFrame(scoreFrame);
     generation++;
@@ -138,6 +140,7 @@ function boot() {
     requestAnimationFrame(() => {view.resize();el("viewport").scrollTop=mapScroll;});
   }
   function start(i: number) {
+    sound.reset();
     setRouteOpen(false);
     clearDrag();
     cancelAnimationFrame(scoreFrame);
@@ -193,7 +196,7 @@ function boot() {
       ball.state === "ready"
         ? !tutorialSeen && !drag ? "" : drag
           ? "松手击球"
-          : index === 3 ? "借叶片转向" : index === 4 ? "瞄准蓝色传送门" : index === 2
+          : index === 3 ? "借叶片转向" : index === 4 ? "借挡板三次反弹" : index === 2
             ? "观察同事后出杆"
             : index === 1
               ? "借墙反弹"
@@ -464,15 +467,14 @@ function boot() {
           acc >= STEP &&
           (ball.state === "moving" || ball.state === "ready")
         ) {
+          const previousBounces=ball.bounces,previousTransfers=ball.teleports||0;
           step(ball, levels[index]);
+          if(ball.bounces>previousBounces){
+            view.contactFeedback(ball);
+            sound.impact(ball.surface||"wood",Math.min(Math.hypot(ball.vx,ball.vy)/500,1),ball.time);
+          }
+          if((ball.teleports||0)>previousTransfers){view.teleport(ball);sound.play("portal",.6);}
           acc -= STEP;
-        }
-        if (ball.bounces > bounces) {
-          view.bump(ball.surface, ball.lastCollider);
-          sound.play(
-            ball.surface || "wood",
-            Math.min(Math.hypot(ball.vx, ball.vy) / 400, 1),
-          );
         }
         const state = (ball as Ball).state;
         if (state === "won") {
@@ -487,7 +489,7 @@ function boot() {
       view.updateBall(ball, dt);
       if (winDelay >= 0) {
         winDelay += dt;
-        if (winDelay > 0.9) {
+        if (winDelay > 0.65) {
           winDelay = -1;
           result();
         }

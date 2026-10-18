@@ -1,3 +1,4 @@
+import { ShotFeedback } from "./shot-feedback";
 import {CourseLandscape} from "./diorama-art";
 import {SpecialModels} from "./special-models";
 import * as T from "three";
@@ -36,6 +37,8 @@ export class GolfScene {
   private shadowTexture: T.CanvasTexture;
   private burstTime = -1;
   private impact = 0;
+  private squashTime=0;
+  private feedback?:ShotFeedback;
   private capture?: { x: number; y: number; t: number };
   private resizeObserver: ResizeObserver;
   constructor(public canvas: HTMLCanvasElement) {
@@ -210,6 +213,7 @@ export class GolfScene {
     this.special=undefined;
     this.landscape=undefined;
     this.capture = undefined;
+    this.feedback=undefined;this.impact=0;this.squashTime=0;
     this.burstTime = -1;
     this.lastBall = undefined;
   }
@@ -379,6 +383,7 @@ export class GolfScene {
     this.root.add(this.route);
     this.particles = new T.Group();
     this.root.add(this.particles);
+    this.feedback=new ShotFeedback(this.root);
     this.updateBall(createBall(l), 0);
     this.resize();
   }
@@ -508,13 +513,15 @@ export class GolfScene {
     };
   }
   updateBall(b: Ball, dt: number) {
+    this.feedback?.update(b,dt);
     this.course?.update(b);
     this.special?.update(b.time);
     this.landscape?.update(b.time);
     if (this.capture) {
       const c = this.capture;
       c.t += dt;
-      const t = Math.min(c.t / 0.65, 1),
+      this.flag.position.y=Math.sin(Math.min(c.t/.55,1)*Math.PI)*12;
+      const t = Math.min(c.t / 0.5, 1),
         e = 1 - (1 - t) ** 3;
       this.ball.position.copy(
         world(
@@ -527,7 +534,8 @@ export class GolfScene {
       this.shadow.visible = false;
       return;
     }
-    const squash = 1 - Math.sin((this.impact / 0.15) * Math.PI) * 0.12;
+    this.squashTime=Math.max(0,this.squashTime-dt);
+    const squash = 1 - Math.sin((this.squashTime / 0.15) * Math.PI) * 0.12;
     this.ball.scale.set(1 / Math.sqrt(squash), squash, 1 / Math.sqrt(squash));
     this.shadow.visible = true;
     const p = world(b.x, b.y, R);
@@ -618,7 +626,7 @@ export class GolfScene {
   captureBall(b: Ball) {
     this.capture = { x: b.x, y: b.y, t: 0 };
     this.burstTime = 0;
-    this.impact = 0.35;
+    this.impact = 0;
     for (let i = 0; i < 34; i++) {
       const p = this.mesh(
         new T.BoxGeometry(5, 3, 8),
@@ -635,8 +643,15 @@ export class GolfScene {
       );
     }
   }
+  contactFeedback(b:Ball) {this.feedback?.contact(b);this.bump(b.surface,b.lastCollider);}
+  teleport(b:Ball) {
+    const p=this.level.portals;if(!p)return;
+    const exit=Math.hypot(b.x-p[0].x,b.y-p[0].y)<Math.hypot(b.x-p[1].x,b.y-p[1].y)?0:1;
+    this.feedback?.teleport(this.level,exit);this.lastBall=undefined;
+  }
   bump(_surface?: string, id?: string) {
-    this.impact = 0.15;
+    this.squashTime = 0.15;
+    this.impact = id?.startsWith("windmill-blade") ? .11 : 0;
     if (id) this.course?.hit(id);
   }
   render(t: number, dt: number, _menu: boolean) {

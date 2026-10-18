@@ -10,5 +10,5 @@ assert.ok(platformContains(pads[0],level.start.x,level.start.y));assert.ok(platf
 for(const [i,p] of level.portals!.entries())assert.ok(platformContains(pads[i],p.x,p.y),'portal on real ground');
 assert.equal(platformContains(pads[0],375,125),false,'old square corner is now a real cliff');
 assert.equal(platformContains(pads[0],440,280),false,'gap remains water');
-const b=createBall(level);shoot(b,70,0);for(let n=0;n<2000&&b.state==='moving';n++)step(b,level);assert.equal(b.state,'won');assert.equal(b.teleports,1);
-console.log('PASS shared island outlines: different sizes, safe inset, irregular cliffs, ocean gap and unchanged portal solution');
+const b=createBall(level);shoot(b,110,0);for(let n=0;n<2000&&b.state==='moving';n++)step(b,level);assert.equal(b.state,'won');assert.equal(b.teleports,1);
+console.log('PASS shared island outlines: different sizes, safe inset, irregular cliffs, ocean gap and three-rebound portal solution');

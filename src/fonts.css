@@ -35,9 +35,9 @@
 :root {
   --font-title: "Maoken Assorted Sans", "Title Loading Fallback", HuangYou, sans-serif;
   /* Reading face: naturally proportioned OFL Noto-derived UI subset. */
-  --font-body: "Golf UI Sans", sans-serif;
+  --font-body: HuangYou, sans-serif;
   --font-body-weight: 400;
-  --font-body-emphasis: 700;
+  --font-body-emphasis: 400;
   font-synthesis: none;
 }
 /* Normal-proportion reading face, renamed OFL subset of Noto Sans CJK SC 2.004. */

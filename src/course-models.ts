@@ -190,6 +190,13 @@ export class CourseModels {
     let body: T.Mesh;
     if(o.model==="portal-post") {
       body=this.box(o.w,40,o.h,o.id.startsWith("portal-0")?0x66c5ce:0xef9166,x,20,z,this.host.root,1);
+    } else if (o.id.startsWith("reef-")) {
+      body = this.box(o.w, 23, o.h, 0x5d9ea0, x, 11.5, z, this.host.root, 2);
+      this.box(o.w, 5, o.h, 0xf4d6a0, x, 25, z, this.host.root, 2);
+      for (const side of [-1, 1]) {
+        const px=x+(o.w>o.h?side*(o.w/2-9):0),pz=z+(o.h>o.w?side*(o.h/2-9):0);
+        this.box(19, 32, 19, 0xe6bd86, px, 16, pz, this.host.root, 2);
+      }
     } else if (o.model === "fence") {
       body = this.box(o.w, 30, o.h, 0xc38d59, x, 15, z);
       for (let y = o.y + 12; y <= o.y + o.h - 9; y += 55) {

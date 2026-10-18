@@ -81,7 +81,7 @@ const legs: Rect[] = desks.flatMap((d, i) =>
     })),
   ),
 );
-const portalPair:[Portal,Portal]=[{x:300,y:280,angle:0,r:23},{x:650,y:150,angle:Math.PI/2,r:23}];
+const portalPair:[Portal,Portal]=[{x:300,y:280,angle:0,r:23},{x:650,y:150,angle:.65,r:23}];
 // The tangible gate posts share the model's 9-unit footprint. The overhead
 // crossbar clears the ball, while the luminous ring itself is the trigger.
 const portalPosts:Rect[]=portalPair.flatMap((p,i)=>[-1,1].map(side=>{
@@ -217,8 +217,12 @@ export const levels: Level[] = [
     circles:[{id:"windmill-hub",x:430,y:280,r:21,model:"stump",surface:"wood"}],
   },
   {
-    name: "不可能的一杆", subtitle: "05 / 换个方向，就有可能", hint: "蓝门入，橙门出；出口箭头决定新的方向。",
-    start:{x:110,y:280},hole:{x:650,y:430},obstacles:portalPosts,circles:[
+    name: "不可能的一杆", subtitle: "05 / 换个方向，就有可能", hint: "借海岛挡板连续反弹，再折回球洞。",
+    start:{x:110,y:280},hole:{x:740,y:390},obstacles:[...portalPosts,
+      {id:"reef-east",x:810,y:190,w:16,h:280,model:"fence",surface:"rubber"},
+      {id:"reef-west",x:600,y:230,w:16,h:220,model:"fence",surface:"rubber"},
+      {id:"reef-south",x:600,y:475,w:226,h:16,model:"fence",surface:"rubber"},
+    ],circles:[
       {id:"cliff-palm-0",x:28,y:250,r:6,model:"palm",surface:"wood"},
       {id:"cliff-palm-1",x:820,y:80,r:6,model:"palm",surface:"wood"},
       rock("shore-rock-0",340,475,8),rock("shore-rock-1",610,510,8),

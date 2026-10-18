@@ -49,7 +49,7 @@ export function farmHouse(host:GolfScene,parent:T.Object3D,x:number,z:number,sca
 }
 export class CourseLandscape {
   private mill?:T.Group;
-  private water:T.Mesh[]=[];
+  private seaMaterial?:T.ShaderMaterial;
   constructor(private host:GolfScene,private level:Level){
     if(level.rotor)this.mountain();
     if(level.platforms)this.ocean();
@@ -81,7 +81,27 @@ export class CourseLandscape {
   }
   private ocean(){
     const h=this.host;
-    const sea=h.mesh(new T.PlaneGeometry(12000,12000),0x65aab6,0,-255,0);sea.rotation.x=-Math.PI/2;sea.castShadow=false;sea.receiveShadow=false;
+    this.seaMaterial=new T.ShaderMaterial({
+      uniforms:{time:{value:0}},
+      vertexShader: 'varying vec2 seaPosition; void main(){seaPosition=position.xy;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
+      fragmentShader: `uniform float time; varying vec2 seaPosition;
+        void main(){
+          vec2 p=seaPosition;
+          float swell=sin(p.x*.003+p.y*.0018+time*.11)*.5+.5;
+          float depth=sin(p.y*.0024-p.x*.0011)*.5+.5;
+          vec3 water=mix(vec3(.10,.40,.57),vec3(.19,.68,.71),depth);
+          water=mix(water,vec3(.32,.77,.76),swell*.38);
+          float wave=sin(p.y*.040+sin(p.x*.008+time*.13)*2.0+time*.38);
+          float crossWave=sin(p.x*.032-p.y*.026+time*.24);
+          float glint=pow(max(0.,wave),22.)*pow(max(0.,crossWave),6.);
+          water+=vec3(.32,.40,.36)*glint*.55;
+          float ribbon=pow(max(0.,sin(p.y*.010+p.x*.003+sin(p.x*.004)*2.+time*.18)),35.);
+          water=mix(water,vec3(.57,.85,.82),ribbon*.20);
+          gl_FragColor=vec4(water,1.);
+        }`
+    });
+    const sea=new T.Mesh(new T.PlaneGeometry(12000,12000),this.seaMaterial);
+    sea.position.set(0,-255,0);sea.rotation.x=-Math.PI/2;sea.castShadow=false;sea.receiveShadow=false;h.root.add(sea);
     for(const [i,p] of this.level.platforms!.entries()){
       const points=p.outline!.map(q=>({x:q.x-450,y:q.y-280}));
       const hole=i===1?{x:this.level.hole.x-450,y:this.level.hole.y-280}:undefined;
@@ -91,14 +111,9 @@ export class CourseLandscape {
       // Palms and shore rocks are built by CourseModels from real circle colliders.
       for(let j=0;j<3;j++){const s=points[(j+4)%points.length];const shell=h.mesh(new T.SphereGeometry(3,6,4),0xffefce,s.x,1,s.y);shell.scale.y=.35;}
     }
-    for(let i=0;i<20;i++){
-      const x=-650+(i%5)*320+(i%3)*31,z=-440+Math.floor(i/5)*260;
-      const foam=h.mesh(new T.TorusGeometry(27+(i%4)*7,1.6,3,18,Math.PI*1.3),0xc6e5da,x,-253.7,z);foam.rotation.x=-Math.PI/2;foam.scale.y=.26;foam.castShadow=false;
-      const m=foam.material as T.MeshStandardMaterial;m.transparent=true;m.opacity=.55;foam.userData.baseX=x;this.water.push(foam);
-    }
   }
   update(time:number){
+    if(this.seaMaterial)this.seaMaterial.uniforms.time.value=time;
     if(this.mill)this.mill.rotation.z=-time*.35;
-    this.water.forEach((w,i)=>{w.position.x=w.userData.baseX+Math.sin(time*.22+i)*5;(w.material as T.MeshStandardMaterial).opacity=.4+Math.sin(time*.4+i)*.16;});
   }
 }
