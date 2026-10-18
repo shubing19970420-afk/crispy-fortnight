@@ -65,7 +65,7 @@ try{
   for(let i=0;i<boxes.length;i++){
    assert.ok(boxes[i].left>=0&&boxes[i].right<=width+1,'production plaques fit width');
    if(i)assert.ok(width>=650?boxes[i].left>boxes[i-1].left:boxes[i].top>boxes[i-1].top,'production map order');
-   for(let j=i+1;j<boxes.length;j++)assert.ok(Math.min(boxes[i].right,boxes[j].right)-Math.max(boxes[i].left,boxes[j].left)<=2||Math.min(boxes[i].bottom,boxes[j].bottom)-Math.max(boxes[i].top,boxes[j].top)<=2,'production plaques do not overlap');
+   for(let j=i+1;j<boxes.length;j++)assert.ok(Math.min(boxes[i].right,boxes[j].right)-Math.max(boxes[i].left,boxes[j].left)<=2||Math.min(boxes[i].bottom,boxes[j].bottom)-Math.max(boxes[i].top,boxes[j].top)<=2,`production plaques do not overlap: ${width}x${height}, ${i}/${j}`);
   }
  }
  await page.setViewportSize({width:390,height:844});await page.locator('#viewport').evaluate(e=>e.scrollTop=0);await page.waitForTimeout(200);await page.screenshot({path:`${output}/mobile.png`});
@@ -77,3 +77,4 @@ try{
  console.log(`PASS ${process.env.PAGES_URL?'published':'production subdirectory'} game: CSS/JS, original logo, title and regular/bold reading fonts, WebGL, all 5 levels/retry/home, real route worker, mobile; no failed resources`);
 }catch(error){await page.screenshot({path:`${output}/failure.png`});await writeFile(`${output}/report.json`,JSON.stringify({url,resources,errors,failures,error:String(error)},null,2));throw error;}
 finally{await browser.close();await new Promise(r=>server?server.close(r):r());}
+
